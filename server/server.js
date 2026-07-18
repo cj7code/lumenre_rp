@@ -9,6 +9,8 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const studentRoutes = require("./routes/studentRoutes");
+const notFound=require("./middleware/notFound");
+const errorHandler=require("./middleware/errorHandler");
 
 // Load environment variables
 dotenv.config();
@@ -28,6 +30,12 @@ app.use(express.json());
 
 // Registe Student API routes
 app.use("/api/students", studentRoutes);
+
+// Unknown routes
+app.use(notFound);
+
+// Global error handler
+app.use(errorHandler);
 
 // Test route
 app.get("/", (req, res) => {
