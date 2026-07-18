@@ -25,6 +25,7 @@ const studentRoutes = require("./routes/studentRoutes");
 const authRoutes = require("./routes/authRoutes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
+const testRoutes = require("./routes/testRoutes");
 
 // Load Environment Variables
 dotenv.config();
@@ -42,6 +43,7 @@ app.use(express.json());
 // API Routes
 app.use("/api/students", studentRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/test", testRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
