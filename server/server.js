@@ -24,6 +24,7 @@ const path = require("path");
 // Import Application Files
 const connectDB = require("./config/db");
 const studentRoutes = require("./routes/studentRoutes");
+const resultSlipRoutes = require("./routes/resultSlipRoutes");
 const authRoutes = require("./routes/authRoutes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
@@ -47,6 +48,7 @@ app.use(express.json());
 
 // API Routes
 app.use("/api/students", studentRoutes);
+app.use("/api/result-slips", resultSlipRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/results", resultRoutes);
