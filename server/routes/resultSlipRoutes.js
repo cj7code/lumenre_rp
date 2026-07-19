@@ -13,7 +13,8 @@ const pdfUpload = require("../middleware/pdfUpload");
 
 const {
   uploadResultSlip,
-  getMyResultSlips
+  getMyResultSlips,
+  releaseResultSlip
 } = require("../controllers/resultSlipController");
 
 const {
@@ -36,4 +37,10 @@ router.get(
   getMyResultSlips
 );
 
+router.patch(
+  "/:id/release",
+  protect,
+  authorize("admin"),
+  releaseResultSlip
+);
 module.exports = router;
