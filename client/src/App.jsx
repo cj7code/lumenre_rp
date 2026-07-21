@@ -17,6 +17,7 @@ import StudentLogin from "./pages/StudentLogin";
 import StudentDashboard from "./pages/StudentDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import UploadResultSlip from "./pages/UploadResultSlip";
 
 function App(){
 
@@ -42,6 +43,11 @@ return (
     <Route
     path="/admin/dashboard"
     element={<AdminDashboard />}
+    />
+
+    <Route
+    path="/admin/upload"
+    element={<UploadResultSlip />}
     />
   </Routes>
 </BrowserRouter>
