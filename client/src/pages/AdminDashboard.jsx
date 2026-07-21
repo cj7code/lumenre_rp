@@ -7,18 +7,18 @@
  */
 
 import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AdminAuthContext } from "../context/AdminAuthContext";
 
 const AdminDashboard = () => {
 
-  const { user } = useContext(AuthContext);
+  const { admin } = useContext(AdminAuthContext);
 
   return (
 
     <div className="container mt-4">
 
       <h2>
-        Welcome {user?.fullName || "Administrator"}
+        Welcome {admin?.fullName || "Administrator"}
       </h2>
 
       <hr />

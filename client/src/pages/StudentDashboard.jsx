@@ -17,17 +17,15 @@ import {
 import API from "../api/axios";
 
 
-import {
-  AuthContext
-} from "../context/AuthContext";
+import { StudentAuthContext } from "../context/StudentAuthContext";
 
 
 const StudentDashboard = () => {
 
   const {
-    user,
-    token
-  } = useContext(AuthContext);
+  student,
+  studentToken
+} = useContext(StudentAuthContext);
 
 
   const [results, setResults] = useState([]);
@@ -45,7 +43,7 @@ const StudentDashboard = () => {
           {
             headers:{
               Authorization:
-              `Bearer ${token}`
+              `Bearer ${studentToken}`
             }
           }
         );
@@ -97,7 +95,7 @@ const StudentDashboard = () => {
     <div>
 
       <h1>
-        Welcome {user?.fullName}
+        Welcome {student?.fullName}
       </h1>
 
       <h3>

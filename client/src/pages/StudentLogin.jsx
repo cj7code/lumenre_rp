@@ -21,9 +21,7 @@ import {
 import API from "../api/axios";
 
 
-import {
-  AuthContext
-} from "../context/AuthContext";
+import { StudentAuthContext } from "../context/StudentAuthContext";
 
 
 
@@ -41,7 +39,7 @@ const StudentLogin = () => {
   const navigate = useNavigate();
 
 
-  const { login } = useContext(AuthContext);
+  const { loginStudent } = useContext(StudentAuthContext);
 
   const handleChange = (e)=>{
 
@@ -69,7 +67,7 @@ const StudentLogin = () => {
       );
 
 
-      login(
+      loginStudent(
 
         response.data.data.student,
         response.data.data.token

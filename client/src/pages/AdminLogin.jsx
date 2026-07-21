@@ -18,10 +18,7 @@ import {
 } from "react-router-dom";
 
 import API from "../api/axios";
-
-import {
-  AuthContext
-} from "../context/AuthContext";
+import { AdminAuthContext } from "../context/AdminAuthContext";
 
 
 const AdminLogin = () => {
@@ -39,8 +36,8 @@ const AdminLogin = () => {
 
 
   const {
-    login
-  } = useContext(AuthContext);
+    loginAdmin
+  } = useContext(AdminAuthContext);
 
 
   const handleChange = (e)=>{
@@ -64,7 +61,7 @@ const AdminLogin = () => {
         formData
       );
 
-      login(
+      loginAdmin(
         response.data.data.admin,
         response.data.data.token
       );
