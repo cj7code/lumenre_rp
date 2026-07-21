@@ -15,6 +15,8 @@ import {
 
 import StudentLogin from "./pages/StudentLogin";
 import StudentDashboard from "./pages/StudentDashboard";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App(){
 
@@ -30,6 +32,16 @@ return (
     <Route
     path="/student/dashboard"
     element={<StudentDashboard />}
+    />
+
+    <Route
+    path="/admin"
+    element={<AdminLogin />}
+    />
+
+    <Route
+    path="/admin/dashboard"
+    element={<AdminDashboard />}
     />
   </Routes>
 </BrowserRouter>
