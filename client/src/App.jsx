@@ -41,14 +41,19 @@ return (
     />
 
     <Route
-    path="/admin/dashboard"
-    element={<AdminDashboard />}
-    />
+      element={<AdminLayout />}
+    >
 
-    <Route
-    path="/admin/upload"
-    element={<UploadResultSlip />}
-    />
+      <Route
+      path="/admin/dashboard"
+      element={<AdminDashboard />}
+      />
+
+      <Route
+      path="/admin/upload"
+      element={<UploadResultSlip />}
+      />
+    </Route>
   </Routes>
 </BrowserRouter>
 
