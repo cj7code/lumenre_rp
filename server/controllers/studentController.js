@@ -42,6 +42,26 @@ const getStudents = asyncHandler(async (req, res) => {
 
 });
 
+/**
+ * ==========================================================
+ * Admin: Get all students
+ * GET /api/students/admin/all
+ * ==========================================================
+ */
+
+const getAllStudentsForAdmin = asyncHandler(async (req, res) => {
+
+  const students = await Student.find()
+    .sort({ fullName: 1 });
+
+  res.status(200).json({
+    success: true,
+    count: students.length,
+    data: students
+  });
+
+});
+
 // Get Student
 
 const getStudent = asyncHandler(async (req, res) => {
@@ -98,13 +118,10 @@ const deleteStudent = asyncHandler(async (req, res) => {
 module.exports = {
 
   createStudent,
-
   getStudents,
-
   getStudent,
-
   updateStudent,
-
   deleteStudent,
+  getAllStudentsForAdmin
 
 };

@@ -1,6 +1,6 @@
 /**
  * ==========================================================
- * File: routes/resultSlipRoutes.js
+ * routes/resultSlipRoutes.js
  * ----------------------------------------------------------
  * Routes for uploading student PDF result slips.
  * ==========================================================
@@ -14,7 +14,8 @@ const pdfUpload = require("../middleware/pdfUpload");
 const {
   uploadResultSlip,
   getMyResultSlips,
-  releaseResultSlip
+  releaseResultSlip,
+  getAllResultSlips
 } = require("../controllers/resultSlipController");
 
 const {
@@ -31,6 +32,13 @@ router.post(
 );
 
 router.get(
+  "/admin/all",
+  protect,
+  authorize("admin"),
+  getAllResultSlips
+);
+
+router.get(
   "/my-results",
   protect,
   authorize("student"),
@@ -43,4 +51,6 @@ router.patch(
   authorize("admin"),
   releaseResultSlip
 );
+
+
 module.exports = router;

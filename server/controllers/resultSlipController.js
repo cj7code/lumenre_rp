@@ -223,12 +223,40 @@ const releaseResultSlip = asyncHandler(async (req, res) => {
 
 });
 
+/**
+ * ----------------------------------------------------------
+ * Admin: Get all result slips
+ * GET /api/result-slips/admin/all
+ * ----------------------------------------------------------
+ */
+
+const getAllResultSlips = asyncHandler(async (req, res) => {
+
+  const resultSlips = await ResultSlip.find()
+    .populate(
+      "student",
+      "fullName studentId year semester"
+    )
+    .sort({
+      createdAt: -1
+    });
+
+
+  res.status(200).json({
+
+    success:true,
+    count:resultSlips.length,
+    data:resultSlips
+
+  });
+
+});
 
 
 module.exports = {
 
   uploadResultSlip,
   getMyResultSlips,
-  releaseResultSlip
-
+  releaseResultSlip,
+  getAllResultSlips
 };

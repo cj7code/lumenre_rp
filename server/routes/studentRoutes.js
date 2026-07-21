@@ -16,13 +16,19 @@ const {
   getStudent,
   updateStudent,
   deleteStudent,
+  getAllStudentsForAdmin
 } = require("../controllers/studentController");
+
+const { protect, authorize } = require("../middleware/authMiddleware");
 
 // Create student
 router.post("/", createStudent);
 
 // Get all students
 router.get("/", getStudents);
+
+// Get all students for admin
+router.get("/admin/all", protect, authorize("admin"), getAllStudentsForAdmin);
 
 // Get one student
 router.get("/:id", getStudent);
