@@ -48,7 +48,7 @@ const AdminLayout = () => {
 
           <div className="col-md-2 bg-light min-vh-100 p-3">
 
-            <h5>Administrator</h5>
+            <h5>Admin Panel</h5>
 
             <hr />
 

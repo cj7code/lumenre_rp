@@ -211,7 +211,7 @@ actions={(slip)=>(
 <div className="d-flex gap-2">
 
 <a
-href={`http://localhost:5000/${slip.filePath}`}
+href={`http://localhost:5000/${slip.filePath.replace(/\\/g,"/")}`}
 target="_blank"
 className="btn btn-primary btn-sm"
 >

@@ -61,11 +61,22 @@ const storage = multer.diskStorage({
   },
 
 
-  filename:(req,file,cb)=>{
+  filename: async (req, file, cb) => {
+
+  const Student = require("../models/Student");
+
+  try {
+
+    const student = await Student.findById(
+      req.body.student
+    );
+
+
+    const studentId =
+      student ? student.studentId : "unknown";
 
 
     const {
-      studentId,
       year,
       semester,
       academicYear
@@ -73,22 +84,23 @@ const storage = multer.diskStorage({
 
 
     const extension =
-    path.extname(
-      file.originalname
-    );
+      path.extname(file.originalname);
 
 
     const fileName =
-    `${studentId}_Y${year}_S${semester}_${academicYear}${extension}`;
+      `${studentId}_Y${year}_S${semester}_${academicYear}${extension}`;
 
 
-    cb(
-      null,
-      fileName
-    );
+    cb(null, fileName);
 
+
+  } catch(error) {
+
+    cb(error);
 
   }
+
+}
 
 });
 

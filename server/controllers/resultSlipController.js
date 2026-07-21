@@ -123,8 +123,7 @@ async (req,res)=>{
       year,
       semester,
 
-      filePath:
-      req.file.path,
+      filePath: `uploads/results/${req.file.filename}`,
 
       released:false
 

@@ -4,8 +4,8 @@
  * ==========================================================
  */
 
+const Student = require("../models/Student");
 const asyncHandler = require("../middleware/asyncHandler");
-
 const studentService = require("../services/studentService");
 
 //Create Student

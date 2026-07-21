@@ -30,7 +30,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Students from "./pages/Students";
 import UploadResultSlip from "./pages/UploadResultSlip";
 import ResultSlips from "./pages/ResultSlips";
-import Home from "./pages/Home";
 
 
 

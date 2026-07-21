@@ -40,7 +40,7 @@ const UploadResultSlip = () => {
           }
         );
 
-        setStudents(response.data.data);
+        setStudents(response.data.data || []);
 
       } catch (error) {
 
