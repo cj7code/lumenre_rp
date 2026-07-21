@@ -97,6 +97,36 @@ const ResultSlips = () => {
 
   };
 
+  const deleteResult = async(id)=>{
+
+  if(!window.confirm(
+    "Delete this result slip?"
+  )) return;
+
+
+  try{
+
+    await API.delete(
+      `/result-slips/${id}`,
+      {
+        headers:{
+          Authorization:
+          `Bearer ${adminToken}`
+        }
+      }
+    );
+
+    loadResultSlips();
+
+  }
+  catch(error){
+
+    console.error(error);
+
+  }
+
+};
+
 
 return (
 
@@ -178,24 +208,40 @@ data={slips}
 
 actions={(slip)=>(
 
-<button
+<div className="d-flex gap-2">
 
-className="btn btn-success btn-sm"
-
-disabled={slip.released}
-
-onClick={()=>releaseResult(slip._id)}
-
+<a
+href={`http://localhost:5000/${slip.filePath}`}
+target="_blank"
+className="btn btn-primary btn-sm"
 >
+View
+</a>
 
-{slip.released
+
+<button
+className="btn btn-success btn-sm"
+disabled={slip.released}
+onClick={()=>releaseResult(slip._id)}
+>
+{
+slip.released
 ?
 "Released"
 :
 "Release"
 }
-
 </button>
+
+
+<button
+className="btn btn-danger btn-sm"
+onClick={()=>deleteResult(slip._id)}
+>
+Delete
+</button>
+
+</div>
 
 )}
 

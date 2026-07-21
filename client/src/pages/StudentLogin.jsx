@@ -14,7 +14,8 @@ import {
 
 
 import {
-  useNavigate
+  useNavigate,
+  Link
 } from "react-router-dom";
 
 
@@ -138,6 +139,25 @@ const StudentLogin = () => {
         </button>
 
       </form>
+
+      <div className="text-center mt-4">
+
+        <small className="text-muted">
+
+          Staff member?
+
+          {" "}
+
+          <Link
+            to="/admin"
+            className="text-decoration-none"
+          >
+            Admin Login
+          </Link>
+
+        </small>
+
+      </div>
 
     </div>
 

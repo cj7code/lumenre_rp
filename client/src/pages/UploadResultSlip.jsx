@@ -32,7 +32,7 @@ const UploadResultSlip = () => {
       try {
 
         const response = await API.get(
-          "/students",
+          "/students/admin/all",
           {
             headers: {
               Authorization: `Bearer ${adminToken}`
