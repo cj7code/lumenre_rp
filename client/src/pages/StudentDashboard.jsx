@@ -72,9 +72,11 @@ const StudentDashboard = () => {
 
     };
 
-    fetchResults();
+    if (studentToken) {
+      fetchResults();
+    }
 
-  },[token]);
+  },[studentToken]);
 
 
   if(loading){
