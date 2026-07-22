@@ -454,6 +454,33 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 
 });
 
+/**
+ * ==========================================================
+ * Admin: Recent Result Slip Uploads
+ * GET /api/result-slips/recent
+ * ==========================================================
+ */
+
+const getRecentUploads = asyncHandler(async (req, res) => {
+
+  const uploads = await ResultSlip.find()
+    .populate(
+      "student",
+      "fullName studentId"
+    )
+    .sort({
+      createdAt: -1
+    })
+    .limit(5);
+
+  res.status(200).json({
+
+    success: true,
+    data: uploads
+
+  });
+
+});
 
 module.exports = {
 
@@ -462,6 +489,7 @@ module.exports = {
   getAllResultSlips,
   releaseResultSlip,
   deleteResultSlip,
-  getDashboardStats
+  getDashboardStats,
+  getRecentUploads
 
 };

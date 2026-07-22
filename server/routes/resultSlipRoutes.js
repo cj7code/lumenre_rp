@@ -43,7 +43,8 @@ const {
   getAllResultSlips,
   releaseResultSlip,
   deleteResultSlip,
-  getDashboardStats
+  getDashboardStats,
+  getRecentUploads
 
 } =
 require("../controllers/resultSlipController");
@@ -84,6 +85,13 @@ router.get(
   getDashboardStats
 );
 
+// Get Recent Uploads
+router.get(
+  "/recent",
+  protect,
+  authorize("admin"),
+  getRecentUploads
+);
 /**
  * Get all uploaded result slips
  *
