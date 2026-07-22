@@ -421,6 +421,41 @@ asyncHandler(async(req,res)=>{
 
 });
 
+/**
+ * ==========================================================
+ * Admin Dashboard Statistics
+ * GET /api/result-slips/dashboard
+ * ==========================================================
+ */
+
+const Student = require("../models/Student");
+
+const getDashboardStats = asyncHandler(async (req, res) => {
+
+  const totalStudents = await Student.countDocuments();
+
+  const uploadedResults = await ResultSlip.countDocuments();
+
+  const releasedResults = await ResultSlip.countDocuments({
+    released: true
+  });
+
+  const pendingResults = await ResultSlip.countDocuments({
+    released: false
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      totalStudents,
+      uploadedResults,
+      releasedResults,
+      pendingResults
+    }
+  });
+
+});
+
 
 module.exports = {
 
@@ -428,6 +463,7 @@ module.exports = {
   getMyResultSlips,
   getAllResultSlips,
   releaseResultSlip,
-  deleteResultSlip
+  deleteResultSlip,
+  getDashboardStats
 
 };
