@@ -38,6 +38,7 @@ const authRoutes = require("./routes/authRoutes");
 const testRoutes = require("./routes/testRoutes");
 const resultRoutes = require("./routes/resultRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
@@ -102,36 +103,13 @@ app.use(
 // API Routes
 // ==========================================================
 
-app.use(
-  "/api/students",
-  studentRoutes
-);
-
-app.use(
-  "/api/result-slips",
-  resultSlipRoutes
-);
-
-app.use(
-  "/api/auth",
-  authRoutes
-);
-
-app.use(
-  "/api/test",
-  testRoutes
-);
-
-app.use(
-  "/api/results",
-  resultRoutes
-);
-
-app.use(
-  "/api/admin",
-  adminRoutes
-);
-
+app.use("/api/students", studentRoutes);
+app.use("/api/result-slips", resultSlipRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/test", testRoutes);
+app.use("/api/results", resultRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ==========================================================
 // Test Route
