@@ -16,9 +16,7 @@ const createStudent = asyncHandler(async (req, res) => {
   res.status(201).json({
 
     success: true,
-
     message: "Student created successfully.",
-
     data: student,
 
   });
@@ -115,6 +113,44 @@ const deleteStudent = asyncHandler(async (req, res) => {
 
 });
 
+/**
+ * ==========================================================
+ * Admin: Toggle Student Status
+ * PATCH /api/students/:id/status
+ * ==========================================================
+ */
+
+const toggleStudentStatus = asyncHandler(async (req, res) => {
+
+  const student = await Student.findById(
+    req.params.id
+  );
+
+  if (!student) {
+
+    return res.status(404).json({
+      success: false,
+      message: "Student not found."
+    });
+
+  }
+
+  student.isActive = !student.isActive;
+
+  await student.save();
+
+  res.status(200).json({
+
+    success: true,
+
+    message: "Student status updated successfully.",
+
+    data: student
+
+  });
+
+});
+
 module.exports = {
 
   createStudent,
@@ -122,6 +158,7 @@ module.exports = {
   getStudent,
   updateStudent,
   deleteStudent,
-  getAllStudentsForAdmin
+  getAllStudentsForAdmin,
+  toggleStudentStatus
 
 };
