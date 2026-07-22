@@ -428,8 +428,6 @@ asyncHandler(async(req,res)=>{
  * ==========================================================
  */
 
-const Student = require("../models/Student");
-
 const getDashboardStats = asyncHandler(async (req, res) => {
 
   const totalStudents = await Student.countDocuments();
