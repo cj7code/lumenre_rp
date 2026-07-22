@@ -16,6 +16,8 @@ const Students = () => {
 
   const [students, setStudents] = useState([]);
 
+  const [editingStudent,setEditingStudent] = useState(null);
+
   const [search, setSearch] = useState("");
 
   const [formData, setFormData] = useState({
@@ -140,6 +142,64 @@ const Students = () => {
 
   };
 
+  const startEdit = (student)=>{
+
+    setEditingStudent(student);
+
+    setFormData({
+
+      fullName:student.fullName,
+      studentId:student.studentId,
+      year:student.year,
+      semester:student.semester
+
+    });
+
+  };
+
+  const updateStudent = async(e)=>{e.preventDefault();
+
+    try{
+
+      await API.put(
+
+        `/students/${editingStudent._id}`,
+
+        formData,
+
+        {
+          headers:{
+            Authorization:`Bearer ${adminToken}`
+          }
+        }
+
+      );
+
+
+      setEditingStudent(null);
+
+
+      setFormData({
+
+        fullName:"",
+        studentId:"",
+        year:"1",
+        semester:"1"
+
+      });
+
+
+      loadStudents();
+
+
+    }catch(error){
+
+      console.error(error);
+
+    }
+
+  };
+
 
   const deleteStudent = async(id)=>{
 
@@ -210,27 +270,17 @@ const Students = () => {
 
 
       <div className="d-flex justify-content-between mb-3">
-
         <div>
-
           <h2>
             Students
           </h2>
-
           <p className="text-muted">
-
             Total Students:
             {" "}
             {students.length}
-
           </p>
-
         </div>
-
-
       </div>
-
-
 
       <div className="card shadow-sm mb-4">
 
@@ -247,7 +297,11 @@ const Students = () => {
 
 
           <form
-            onSubmit={addStudent}
+            onSubmit={
+              editingStudent
+              ? updateStudent
+              : addStudent
+            }
             className="row g-3"
           >
 
@@ -255,19 +309,12 @@ const Students = () => {
             <div className="col-md-3">
 
               <input
-
                 className="form-control"
-
                 name="fullName"
-
                 placeholder="Full Name"
-
                 value={formData.fullName}
-
                 onChange={handleChange}
-
                 required
-
               />
 
             </div>
@@ -276,19 +323,12 @@ const Students = () => {
             <div className="col-md-3">
 
               <input
-
                 className="form-control"
-
                 name="studentId"
-
                 placeholder="Student ID"
-
                 value={formData.studentId}
-
                 onChange={handleChange}
-
                 required
-
               />
 
             </div>
@@ -297,15 +337,10 @@ const Students = () => {
             <div className="col-md-2">
 
               <select
-
                 className="form-select"
-
                 name="year"
-
                 value={formData.year}
-
                 onChange={handleChange}
-
               >
 
                 <option value="1">
@@ -328,15 +363,10 @@ const Students = () => {
             <div className="col-md-2">
 
               <select
-
                 className="form-select"
-
                 name="semester"
-
                 value={formData.semester}
-
                 onChange={handleChange}
-
               >
 
                 <option value="1">
@@ -346,7 +376,6 @@ const Students = () => {
                 <option value="2">
                   Semester 2
                 </option>
-
 
               </select>
 
@@ -358,108 +387,103 @@ const Students = () => {
               <button
                 className="btn btn-primary w-100"
               >
-
-                Add Student
-
+                {
+                  editingStudent
+                  ?
+                  "Update Student"
+                  :
+                  "Add Student"
+                }
               </button>
+
+              {
+              editingStudent && (
+
+              <button
+              type="button"
+              className="btn btn-secondary mt-3"
+              onClick={()=>{
+
+              setEditingStudent(null);
+
+              setFormData({
+
+              fullName:"",
+              studentId:"",
+              year:"1",
+              semester:"1"
+
+              });
+
+              }}
+              >
+              Cancel
+              </button>
+
+              )
+              }
 
 
             </div>
 
-
           </form>
-
 
         </div>
 
       </div>
 
-
-
       <input
-
         className="form-control mb-3"
-
         placeholder="Search by name or student ID"
-
         value={search}
-
         onChange={(e)=>setSearch(e.target.value)}
-
       />
-
-
 
       <div className="table-responsive">
 
-
         <table className="table table-striped">
-
-
           <thead>
-
             <tr>
-
               <th>ID</th>
-
               <th>Name</th>
-
               <th>Year</th>
-
               <th>Semester</th>
-
               <th>Status</th>
-
               <th>Actions</th>
-
             </tr>
-
           </thead>
-
 
           <tbody>
 
-
           {
-
             filteredStudents.map((student)=>(
-
               <tr key={student._id}>
-
 
                 <td>
                   {student.studentId}
                 </td>
 
-
                 <td>
                   {student.fullName}
                 </td>
-
 
                 <td>
                   {student.year}
                 </td>
 
-
                 <td>
                   {student.semester}
                 </td>
-
 
                 <td>
 
                   {
                     student.isActive
-
                     ?
-
                     <span className="badge bg-success">
                       Active
                     </span>
-
                     :
-
                     <span className="badge bg-danger">
                       Inactive
                     </span>
@@ -468,15 +492,17 @@ const Students = () => {
 
                 </td>
 
-
                 <td>
+                  <button
+                  className="btn btn-sm btn-primary me-2"
+                  onClick={()=>startEdit(student)}
+                  >
+                  Edit
+                  </button>
 
                   <button
-
                     className="btn btn-sm btn-warning me-2"
-
                     onClick={()=>toggleStatus(student._id)}
-
                   >
 
                     {
@@ -486,47 +512,27 @@ const Students = () => {
                       :
                       "Activate"
                     }
-
-
                   </button>
-
-
 
                   <button
-
                     className="btn btn-sm btn-danger"
-
                     onClick={()=>deleteStudent(student._id)}
-
                   >
-
                     Delete
-
                   </button>
-
 
                 </td>
 
-
               </tr>
-
 
             ))
 
           }
 
-
           </tbody>
-
-
         </table>
-
-
       </div>
-
-
     </div>
-
   );
 
 };
