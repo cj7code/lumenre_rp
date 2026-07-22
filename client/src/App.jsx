@@ -30,6 +30,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Students from "./pages/Students";
 import UploadResultSlip from "./pages/UploadResultSlip";
 import ResultSlips from "./pages/ResultSlips";
+import Payments from "./pages/Payments";
 
 
 
@@ -84,9 +85,15 @@ function App(){
           />
 
           <Route
+            path="/admin/payments"
+            element={<Payments />}
+          />
+
+          <Route
             path="/admin/results"
             element={<ResultSlips />}
           />
+
         </Route>
       </Routes>
     </BrowserRouter>

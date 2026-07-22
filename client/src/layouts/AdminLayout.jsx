@@ -106,6 +106,19 @@ const AdminLayout = () => {
 
               </li>
 
+              <li className="nav-item">
+
+                <Link
+                className="nav-link"
+                to="/admin/payments"
+                >
+
+                Payments
+
+                </Link>
+
+              </li>
+
               <li className="nav-item mt-4">
 
                 <button
