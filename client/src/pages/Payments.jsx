@@ -15,6 +15,7 @@ const Payments = () => {
 
   const { adminToken } = useContext(AdminAuthContext);
   const [payments, setPayments] = useState([]);
+  const [students,setStudents] = useState([]);
 
 
   const [formData, setFormData] = useState({
@@ -29,7 +30,15 @@ const Payments = () => {
 
   useEffect(()=>{
 
-    loadPayments();
+    const loadData = async()=>{
+
+        await loadStudents();
+
+        await loadPayments();
+
+    };
+
+    loadData();
 
   },[]);
 
@@ -53,6 +62,7 @@ const Payments = () => {
 
       );
 
+      console.log(response.data.data);
 
       setPayments(
         response.data.data
@@ -67,8 +77,7 @@ const Payments = () => {
 
   };
 
-
-
+    
   const handleChange=(e)=>{
 
     setFormData({
@@ -126,26 +135,56 @@ const Payments = () => {
 
 
 
-  const editPayment=(payment)=>{
-
+  const editPayment = (payment) => {
 
     setFormData({
 
-      student:
-      payment.student._id,
+        student:
+        payment.student?._id || "",
 
-      totalFees:
-      payment.totalFees,
+        totalFees:
+        payment.totalFees,
 
-      amountPaid:
-      payment.amountPaid
+        amountPaid:
+        payment.amountPaid
 
     });
-
 
   };
 
 
+  const loadStudents = async()=>{
+
+    try{
+
+        const response =
+        await API.get(
+
+        "/students/admin/all",
+
+        {
+            headers:{
+            Authorization:
+            `Bearer ${adminToken}`
+            }
+        }
+
+        );
+
+        console.log(response.data.data);
+
+        setStudents(
+        response.data.data
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+  };
 
   return (
 
@@ -177,17 +216,32 @@ const Payments = () => {
 
             <div className="col-md-4">
 
-              <input
-
-                className="form-control"
-                placeholder="Student ID"
+              <select
+                className="form-select"
                 name="student"
-                value={formData.student}
+                value={formData.student || ""}
                 onChange={handleChange}
                 required
+                >
 
-              />
+                <option value="">
+                Select Student
+                </option>
 
+                {
+                students.map((student)=>(
+                <option
+                key={student._id}
+                value={student._id}
+                >
+
+                {student.fullName}
+                ({student.studentId})
+                </option>
+                ))
+                }
+
+                </select>
             </div>
 
 

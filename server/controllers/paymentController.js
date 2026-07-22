@@ -67,10 +67,10 @@ amountPaid
 
 }=req.body;
 
-const balance =
-Number(totalFees)
--
-Number(amountPaid);
+const balance = Math.max(
+    Number(totalFees) - Number(amountPaid),
+    0
+);
 
 
 
