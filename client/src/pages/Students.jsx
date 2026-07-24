@@ -301,7 +301,17 @@ const Students = () => {
 
       );
 
-      setMessage(response.data.message);
+      const result = response.data.data;
+
+      setMessage(
+
+        `Imported: ${result.imported} | ` +
+
+        `Duplicates: ${result.duplicates} | ` +
+
+        `Errors: ${result.errors}`
+
+      );
 
       loadStudents();
 
