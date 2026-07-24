@@ -13,12 +13,12 @@ import { AdminAuthContext } from "../context/AdminAuthContext";
 const Students = () => {
 
   const { adminToken } = useContext(AdminAuthContext);
-
   const [students, setStudents] = useState([]);
-
   const [editingStudent,setEditingStudent] = useState(null);
-
   const [search, setSearch] = useState("");
+  const [excelFile, setExcelFile] = useState(null);
+  const [message, setMessage] = useState("");
+  const [importing, setImporting] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -263,6 +263,68 @@ const Students = () => {
 
   });
 
+  const handleExcelChange = (e) => {
+
+    setExcelFile(e.target.files[0]);
+
+  };
+
+  const importStudents = async () => {
+
+    if (!excelFile) {
+
+      setMessage("Please select an Excel file.");
+
+      return;
+
+    }
+
+    try {
+
+      setImporting(true);
+
+      const formData = new FormData();
+
+      formData.append("file", excelFile);
+
+      const response = await API.post(
+
+        "/bulk-students/import",
+
+        formData,
+
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`
+          }
+        }
+
+      );
+
+      setMessage(response.data.message);
+
+      loadStudents();
+
+      setExcelFile(null);
+
+    } catch (error) {
+
+      setMessage(
+
+        error.response?.data?.message ||
+
+        "Import failed."
+
+      );
+
+    } finally {
+
+      setImporting(false);
+
+    }
+
+  };
+
 
   return (
 
@@ -271,13 +333,9 @@ const Students = () => {
 
       <div className="d-flex justify-content-between mb-3">
         <div>
-          <h2>
-            Students
-          </h2>
-          <p className="text-muted">
-            Total Students:
-            {" "}
-            {students.length}
+          <h2>Student Management</h2>
+          <p className="text-muted mb-0">
+            Total Students: {filteredStudents.length}
           </p>
         </div>
       </div>
@@ -427,6 +485,80 @@ const Students = () => {
             </div>
 
           </form>
+
+        </div>
+
+      </div>
+
+      <div className="card mb-4">
+
+        <div className="card-body">
+
+          <h5 className="mb-3">
+
+            Bulk Student Import
+
+          </h5>
+
+          <div className="row">
+
+            <div className="col-md-8">
+
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                className="form-control"
+                onChange={handleExcelChange}
+              />
+
+            </div>
+
+            <div className="col-md-4">
+
+              <button
+                className="btn btn-success w-100"
+                onClick={importStudents}
+                disabled={importing}
+              >
+
+                {
+
+                  importing
+
+                  ? "Importing..."
+
+                  : "Import Students"
+
+                }
+
+              </button>
+              <a
+                href="/StudentTemplate.xlsx"
+                className="btn btn-outline-primary w-100 mt-2"
+                download
+              >
+
+                Download Template
+
+              </a>
+
+            </div>
+
+          </div>
+
+          {
+
+            message && (
+
+              <div className="alert alert-info mt-3 mb-0">
+
+                {message}
+
+              </div>
+
+            )
+
+          }
 
         </div>
 
