@@ -16,7 +16,10 @@ const {
   updateStudent,
   deleteStudent,
   getAllStudentsForAdmin,
-  toggleStudentStatus
+  toggleStudentStatus,
+  bulkUpdateStatus,
+  bulkDeleteStudents,
+  restoreStudent
 } = require("../controllers/studentController");
 
 const {
@@ -53,5 +56,29 @@ router.get("/", getStudents);
 // Get one student
 router.get("/:id", getStudent);
 
+// Bulk activate/deactivate students
+router.patch(
+  "/bulk/status",
+  protect,
+  authorize("admin"),
+  bulkUpdateStatus
+);
+
+
+// Bulk delete students
+router.delete(
+  "/bulk/delete",
+  protect,
+  authorize("admin"),
+  bulkDeleteStudents
+);
+
+// Restore deleted student
+router.patch(
+  "/:id/restore",
+  protect,
+  authorize("admin"),
+  restoreStudent
+);
 
 module.exports = router;

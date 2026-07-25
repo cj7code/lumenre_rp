@@ -14,6 +14,11 @@ const Students = () => {
 
   const { adminToken } = useContext(AdminAuthContext);
   const [students, setStudents] = useState([]);
+  const [selectedStudents,setSelectedStudents] = useState([]);
+  const [page,setPage] = useState(1);
+  const [limit,setLimit] = useState(25);
+  const [totalPages,setTotalPages] = useState(1);
+  const [totalStudents, setTotalStudents] = useState(0);
   const [editingStudent,setEditingStudent] = useState(null);
   const [search, setSearch] = useState("");
   const [yearFilter, setYearFilter] = useState("");
@@ -35,7 +40,15 @@ const Students = () => {
 
     loadStudents();
 
-  }, []);
+  }, [
+    adminToken,
+    page,
+    limit,
+    search,
+    yearFilter,
+    semesterFilter,
+    statusFilter
+  ]);
 
 
   const loadStudents = async () => {
@@ -43,15 +56,40 @@ const Students = () => {
     try {
 
       const response = await API.get(
+
         "/students/admin/all",
+
         {
+
+          params: {
+
+            page,
+
+            limit,
+
+            search,
+
+            year: yearFilter,
+
+            semester: semesterFilter,
+
+            status: statusFilter
+
+          },
+
           headers: {
+
             Authorization: `Bearer ${adminToken}`
+
           }
+
         }
+
       );
 
       setStudents(response.data.data);
+      setTotalPages(response.data.totalPages);
+      setTotalStudents(response.data.totalStudents);
 
     } catch(error) {
 
@@ -243,60 +281,6 @@ const Students = () => {
   };
 
 
-  const filteredStudents = students.filter(student => {
-
-    const searchText = search.toLowerCase();
-
-    const matchesSearch =
-
-      student.fullName
-        .toLowerCase()
-        .includes(searchText)
-
-      ||
-
-      student.studentId
-        .toLowerCase()
-        .includes(searchText);
-
-    const matchesYear =
-
-      yearFilter === ""
-
-      ||
-
-      student.year.toString() === yearFilter;
-
-    const matchesSemester =
-
-      semesterFilter === ""
-
-      ||
-
-      student.semester.toString() === semesterFilter;
-
-    const matchesStatus =
-
-      statusFilter === ""
-
-      ||
-
-      student.isActive.toString() === statusFilter;
-
-    return (
-
-      matchesSearch &&
-
-      matchesYear &&
-
-      matchesSemester &&
-
-      matchesStatus
-
-    );
-
-  });
-
   const handleExcelChange = (e) => {
 
     setExcelFile(e.target.files[0]);
@@ -420,6 +404,134 @@ const Students = () => {
   };
 
 
+  const toggleStudentSelection = (id)=>{
+
+    setSelectedStudents(prev =>
+
+      prev.includes(id)
+
+      ?
+
+      prev.filter(studentId => studentId !== id)
+
+      :
+
+      [
+        ...prev,
+        id
+      ]
+
+    );
+
+  };
+
+
+
+  const selectAllStudents = ()=>{
+
+
+    if(selectedStudents.length === students.length){
+
+      setSelectedStudents([]);
+
+    }
+    else{
+
+      setSelectedStudents(
+
+        students.map(student => student._id)
+
+      );
+
+    }
+
+  };
+
+
+  const bulkAction = async(action)=>{
+
+
+    if(selectedStudents.length === 0){
+
+      alert("Select students first.");
+
+      return;
+
+    }
+
+
+    try{
+
+
+      if(action === "delete"){
+
+        await API.delete(
+
+          "/students/bulk/delete",
+
+          {
+
+            data:{
+              studentIds:selectedStudents
+            },
+
+            headers:{
+              Authorization:
+              `Bearer ${adminToken}`
+            }
+
+          }
+
+        );
+
+      }
+
+
+      else{
+
+
+        await API.patch(
+
+          "/students/bulk/status",
+
+          {
+
+            studentIds:selectedStudents,
+
+            status:
+            action === "activate"
+
+          },
+
+          {
+
+            headers:{
+              Authorization:
+              `Bearer ${adminToken}`
+            }
+
+          }
+
+        );
+
+      }
+
+
+      setSelectedStudents([]);
+
+      loadStudents();
+
+
+    }
+    catch(error){
+
+      console.error(error);
+
+    }
+
+  };
+
+
   return (
 
     <div className="container-fluid">
@@ -432,11 +544,11 @@ const Students = () => {
 
           Showing
 
-          <strong> {filteredStudents.length} </strong>
+          <strong> {students.length} </strong>
 
           of
 
-          <strong> {students.length} </strong>
+          <strong> {totalStudents} </strong>
 
           students
 
@@ -679,9 +791,10 @@ const Students = () => {
           <select
             className="form-select"
             value={yearFilter}
-            onChange={(e) =>
-              setYearFilter(e.target.value)
-            }
+            onChange={(e) => {
+              setYearFilter(e.target.value);
+              setPage(1);
+            }}
           >
 
             <option value="">All Years</option>
@@ -698,9 +811,10 @@ const Students = () => {
           <select
             className="form-select"
             value={semesterFilter}
-            onChange={(e) =>
-              setSemesterFilter(e.target.value)
-            }
+            onChange={(e) => {
+              setSemesterFilter(e.target.value);
+              setPage(1);
+            }}
           >
 
             <option value="">All Semesters</option>
@@ -716,9 +830,10 @@ const Students = () => {
           <select
             className="form-select"
             value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(e.target.value)
-            }
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
           >
 
             <option value="">All Status</option>
@@ -755,15 +870,56 @@ const Students = () => {
         className="form-control mb-3"
         placeholder="Search by name or student ID"
         value={search}
-        onChange={(e)=>setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
       />
 
+
+      <div className="mb-3">
+
+        <button
+        className="btn btn-success me-2"
+        onClick={()=>bulkAction("activate")}
+        >
+        Activate Selected
+        </button>
+
+
+        <button
+        className="btn btn-warning me-2"
+        onClick={()=>bulkAction("deactivate")}
+        >
+        Deactivate Selected
+        </button>
+
+
+        <button
+        className="btn btn-danger"
+        onClick={()=>bulkAction("delete")}
+        >
+        Delete Selected
+        </button>
+
+      </div>
+
       <div className="table-responsive">
+        
 
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={
+                  selectedStudents.length === students.length &&
+                  students.length > 0
+                  }
+                  onChange={selectAllStudents}
+                />
+              </th>
               <th>Name</th>
               <th>Year</th>
               <th>Semester</th>
@@ -775,8 +931,16 @@ const Students = () => {
           <tbody>
 
           {
-            filteredStudents.map((student)=>(
+            students.map((student)=>(
               <tr key={student._id}>
+
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedStudents.includes(student._id)}
+                    onChange={() => toggleStudentSelection(student._id)}
+                  />
+                </td>
 
                 <td>
                   {student.studentId}
@@ -797,15 +961,29 @@ const Students = () => {
                 <td>
 
                   {
-                    student.isActive
-                    ?
-                    <span className="badge bg-success">
-                      Active
-                    </span>
-                    :
-                    <span className="badge bg-danger">
-                      Inactive
-                    </span>
+                  student.isDeleted
+
+                  ?
+
+                  <span className="badge bg-dark">
+                  Deleted
+                  </span>
+
+                  :
+
+                  student.isActive
+
+                  ?
+
+                  <span className="badge bg-success">
+                  Active
+                  </span>
+
+                  :
+
+                  <span className="badge bg-warning text-dark">
+                  Inactive
+                  </span>
 
                   }
 
@@ -850,6 +1028,131 @@ const Students = () => {
 
           </tbody>
         </table>
+
+        <div className="d-flex justify-content-between align-items-center mt-3">
+
+          <div>
+
+            <small className="text-muted">
+
+              Showing
+
+              <strong> {students.length} </strong>
+
+              of
+
+              <strong> {totalStudents} </strong>
+
+              students
+
+            </small>
+
+          </div>
+
+
+          <nav>
+
+            <ul className="pagination pagination-sm mb-0">
+
+              <li
+                className={`page-item ${page === 1 ? "disabled" : ""}`}
+              >
+
+                <button
+                  className="page-link"
+                  onClick={() => setPage(page - 1)}
+                >
+
+                  Previous
+
+                </button>
+
+              </li>
+
+              {
+
+                [...Array(totalPages)].map((_, index) => (
+
+                  <li
+                    key={index}
+                    className={`page-item ${page === index + 1 ? "active" : ""}`}
+                  >
+
+                    <button
+                      className="page-link"
+                      onClick={() => setPage(index + 1)}
+                    >
+
+                      {index + 1}
+
+                    </button>
+
+                  </li>
+
+                ))
+
+              }
+
+              <li
+                className={`page-item ${page === totalPages ? "disabled" : ""}`}
+              >
+
+                <button
+                  className="page-link"
+                  onClick={() => setPage(page + 1)}
+                >
+
+                  Next
+
+                </button>
+
+              </li>
+
+            </ul>
+
+          </nav>
+
+
+          <div className="d-flex align-items-center">
+
+            <span className="me-2">
+
+              Rows
+
+            </span>
+
+            <select
+
+              className="form-select form-select-sm"
+
+              style={{ width: "90px" }}
+
+              value={limit}
+
+              onChange={(e) => {
+
+                setLimit(Number(e.target.value));
+
+                setPage(1);
+
+              }}
+
+            >
+
+              <option value="10">10</option>
+
+              <option value="25">25</option>
+
+              <option value="50">50</option>
+
+              <option value="100">100</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
