@@ -11,6 +11,13 @@ const Student = require("../models/Student");
 const asyncHandler = require("../middleware/asyncHandler");
 const fs = require("fs");
 
+/**
+ * ==========================================================
+ * Import students from Excel
+ * POST /api/bulk-students/import
+ * ==========================================================
+ */
+
 const importStudents = asyncHandler(async (req, res) => {
 
   if (!req.file) {
@@ -31,12 +38,12 @@ const importStudents = asyncHandler(async (req, res) => {
   );
 
   let imported = 0;
-    let duplicates = 0;
-    let errors = 0;
+  let duplicates = 0;
+  let errors = 0;
 
-    const errorList = [];
+  const errorList = [];
 
-    for (let i = 0; i < rows.length; i++) {
+  for (let i = 0; i < rows.length; i++) {
 
     const row = rows[i];
 
@@ -49,88 +56,88 @@ const importStudents = asyncHandler(async (req, res) => {
     // Student ID required
     if (!studentId) {
 
-        errors++;
+      errors++;
 
-        errorList.push({
+      errorList.push({
         row: i + 2,
         studentId: "",
         reason: "Student ID is required."
-        });
+      });
 
-        continue;
+      continue;
 
     }
 
     // Name required
     if (!fullName) {
 
-        errors++;
+      errors++;
 
-        errorList.push({
+      errorList.push({
         row: i + 2,
         studentId,
         reason: "Student name is required."
-        });
+      });
 
-        continue;
+      continue;
 
     }
 
     // Validate year
     if (![1, 2, 3].includes(year)) {
 
-        errors++;
+      errors++;
 
-        errorList.push({
+      errorList.push({
         row: i + 2,
         studentId,
         reason: "Year must be 1, 2 or 3."
-        });
+      });
 
-        continue;
+      continue;
 
     }
 
     // Validate semester
     if (![1, 2].includes(semester)) {
 
-        errors++;
+      errors++;
 
-        errorList.push({
+      errorList.push({
         row: i + 2,
         studentId,
         reason: "Semester must be 1 or 2."
-        });
+      });
 
-        continue;
+      continue;
 
     }
 
     const exists = await Student.findOne({
-        studentId
+      studentId
     });
 
     if (exists) {
 
-        duplicates++;
+      duplicates++;
 
-        errorList.push({
+      errorList.push({
         row: i + 2,
         studentId,
         reason: "Student already exists."
-        });
+      });
 
-        continue;
+      continue;
 
     }
 
     await Student.create({
 
-        studentId,
-        fullName,
-        year,
-        semester,
-        isActive: true
+      studentId,
+      fullName,
+      year,
+      semester,
+      isActive: true
 
     });
 
@@ -138,7 +145,33 @@ const importStudents = asyncHandler(async (req, res) => {
 
   }
 
-  /**
+  if (fs.existsSync(req.file.path)) {
+
+    fs.unlinkSync(req.file.path);
+
+  }
+
+  res.status(200).json({
+
+    success: true,
+
+    message: "Student import completed.",
+
+    data: {
+
+      total: rows.length,
+      imported,
+      duplicates,
+      errors,
+      errorList
+
+    }
+
+  });
+
+});
+
+/**
  * ==========================================================
  * Export all students to Excel
  * GET /api/bulk-students/export
@@ -166,8 +199,7 @@ const exportStudents = asyncHandler(async (req, res) => {
 
   const workbook = XLSX.utils.book_new();
 
-  const worksheet =
-    XLSX.utils.json_to_sheet(data);
+  const worksheet = XLSX.utils.json_to_sheet(data);
 
   XLSX.utils.book_append_sheet(
 
@@ -207,35 +239,6 @@ const exportStudents = asyncHandler(async (req, res) => {
   );
 
   res.send(buffer);
-
-});
-
-
-
-  if (fs.existsSync(req.file.path)) {
-
-    fs.unlinkSync(req.file.path);
-
-  }
-
-
-  res.status(200).json({
-
-    success: true,
-
-    message: "Student import completed.",
-
-    data: {
-
-        total: rows.length,
-        imported,
-        duplicates,
-        errors,
-        errorList
-
-    }
-
-  });
 
 });
 

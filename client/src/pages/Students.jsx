@@ -16,6 +16,9 @@ const Students = () => {
   const [students, setStudents] = useState([]);
   const [editingStudent,setEditingStudent] = useState(null);
   const [search, setSearch] = useState("");
+  const [yearFilter, setYearFilter] = useState("");
+  const [semesterFilter, setSemesterFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [excelFile, setExcelFile] = useState(null);
   const [message, setMessage] = useState("");
   const [importing, setImporting] = useState(false);
@@ -240,24 +243,55 @@ const Students = () => {
   };
 
 
-  const filteredStudents =
-  students.filter((student)=>{
+  const filteredStudents = students.filter(student => {
 
-    const text =
-    search.toLowerCase();
+    const searchText = search.toLowerCase();
 
-
-    return (
+    const matchesSearch =
 
       student.fullName
-      .toLowerCase()
-      .includes(text)
+        .toLowerCase()
+        .includes(searchText)
 
       ||
 
       student.studentId
-      .toLowerCase()
-      .includes(text)
+        .toLowerCase()
+        .includes(searchText);
+
+    const matchesYear =
+
+      yearFilter === ""
+
+      ||
+
+      student.year.toString() === yearFilter;
+
+    const matchesSemester =
+
+      semesterFilter === ""
+
+      ||
+
+      student.semester.toString() === semesterFilter;
+
+    const matchesStatus =
+
+      statusFilter === ""
+
+      ||
+
+      student.isActive.toString() === statusFilter;
+
+    return (
+
+      matchesSearch &&
+
+      matchesYear &&
+
+      matchesSemester &&
+
+      matchesStatus
 
     );
 
@@ -395,9 +429,26 @@ const Students = () => {
         <div>
           <h2>Student Management</h2>
           <p className="text-muted mb-0">
-            Total Students: {filteredStudents.length}
+
+          Showing
+
+          <strong> {filteredStudents.length} </strong>
+
+          of
+
+          <strong> {students.length} </strong>
+
+          students
+
           </p>
         </div>
+
+        <button
+          className="btn btn-outline-success"
+          onClick={exportStudents}
+       >
+        Export Students
+       </button>
       </div>
 
       <div className="card shadow-sm mb-4">
@@ -584,9 +635,7 @@ const Students = () => {
                 {
 
                   importing
-
                   ? "Importing..."
-
                   : "Import Students"
 
                 }
@@ -597,22 +646,8 @@ const Students = () => {
                 className="btn btn-outline-primary w-100 mt-2"
                 download
               >
-
                 Download Template
-
               </a>
-
-              <button
-
-              className="btn btn-outline-success w-100 mt-2"
-
-              onClick={exportStudents}
-
-              >
-
-              Export Students
-
-              </button>
 
             </div>
 
@@ -631,6 +666,86 @@ const Students = () => {
             )
 
           }
+
+        </div>
+
+      </div>
+
+
+      <div className="row mb-3">
+
+        <div className="col-md-3">
+
+          <select
+            className="form-select"
+            value={yearFilter}
+            onChange={(e) =>
+              setYearFilter(e.target.value)
+            }
+          >
+
+            <option value="">All Years</option>
+            <option value="1">Year 1</option>
+            <option value="2">Year 2</option>
+            <option value="3">Year 3</option>
+
+          </select>
+
+        </div>
+
+        <div className="col-md-3">
+
+          <select
+            className="form-select"
+            value={semesterFilter}
+            onChange={(e) =>
+              setSemesterFilter(e.target.value)
+            }
+          >
+
+            <option value="">All Semesters</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+
+          </select>
+
+        </div>
+
+        <div className="col-md-3">
+
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(e.target.value)
+            }
+          >
+
+            <option value="">All Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+
+          </select>
+
+        </div>
+
+        <div className="col-md-3">
+
+          <button
+            className="btn btn-secondary w-100"
+            onClick={() => {
+
+              setSearch("");
+              setYearFilter("");
+              setSemesterFilter("");
+              setStatusFilter("");
+
+            }}
+          >
+
+            Clear Filters
+
+          </button>
 
         </div>
 
