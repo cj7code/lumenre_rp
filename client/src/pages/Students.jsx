@@ -336,6 +336,56 @@ const Students = () => {
   };
 
 
+  const exportStudents = async () => {
+
+    try {
+
+      const response = await API.get(
+        "/bulk-students/export",
+
+        {
+
+          responseType: "blob",
+
+          headers: {
+            Authorization:
+            `Bearer ${adminToken}`
+
+          }
+
+        }
+
+      );
+
+      const url =
+        window.URL.createObjectURL(
+
+          new Blob([response.data])
+
+        );
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+
+      link.download = "Students.xlsx";
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  };
+
+
   return (
 
     <div className="container-fluid">
@@ -551,6 +601,18 @@ const Students = () => {
                 Download Template
 
               </a>
+
+              <button
+
+              className="btn btn-outline-success w-100 mt-2"
+
+              onClick={exportStudents}
+
+              >
+
+              Export Students
+
+              </button>
 
             </div>
 

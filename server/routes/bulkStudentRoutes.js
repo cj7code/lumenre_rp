@@ -12,7 +12,8 @@ const router = express.Router();
 const excelUpload = require("../middleware/excelUpload");
 
 const {
-  importStudents
+  importStudents,
+  exportStudents
 } = require("../controllers/bulkStudentController");
 
 const {
@@ -28,4 +29,10 @@ router.post(
   importStudents
 );
 
+router.get(
+  "/export",
+  protect,
+  authorize("admin"),
+  exportStudents
+);
 module.exports = router;

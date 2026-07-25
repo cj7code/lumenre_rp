@@ -138,6 +138,80 @@ const importStudents = asyncHandler(async (req, res) => {
 
   }
 
+  /**
+ * ==========================================================
+ * Export all students to Excel
+ * GET /api/bulk-students/export
+ * ==========================================================
+ */
+
+const exportStudents = asyncHandler(async (req, res) => {
+
+  const students = await Student.find()
+    .sort({
+      fullName: 1
+    });
+
+  const data = students.map(student => ({
+
+    "Student ID": student.studentId,
+    "Full Name": student.fullName,
+    "Year": student.year,
+    "Semester": student.semester,
+    "Status": student.isActive
+      ? "Active"
+      : "Inactive"
+
+  }));
+
+  const workbook = XLSX.utils.book_new();
+
+  const worksheet =
+    XLSX.utils.json_to_sheet(data);
+
+  XLSX.utils.book_append_sheet(
+
+    workbook,
+
+    worksheet,
+
+    "Students"
+
+  );
+
+  const buffer = XLSX.write(
+
+    workbook,
+
+    {
+      type: "buffer",
+      bookType: "xlsx"
+    }
+
+  );
+
+  res.setHeader(
+
+    "Content-Disposition",
+
+    "attachment; filename=Students.xlsx"
+
+  );
+
+  res.setHeader(
+
+    "Content-Type",
+
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+  );
+
+  res.send(buffer);
+
+});
+
+
+
   if (fs.existsSync(req.file.path)) {
 
     fs.unlinkSync(req.file.path);
@@ -166,5 +240,6 @@ const importStudents = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  importStudents
+  importStudents,
+  exportStudents
 };
