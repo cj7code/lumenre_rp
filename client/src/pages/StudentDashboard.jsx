@@ -31,6 +31,7 @@ const StudentDashboard = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedPdf, setSelectedPdf] = useState("");
 
   useEffect(()=>{
 
@@ -94,75 +95,284 @@ const StudentDashboard = () => {
 
   return (
 
-    <div>
+    <div className="container mt-4">
 
-      <h1>
-        Welcome {student?.fullName}
-      </h1>
+      <div className="card shadow-sm mb-4">
 
-      <h3>
-        My Result Slips
-      </h3>
+        <div className="card-body">
 
-      {error && (
+          <h2>
 
-        <p>
-          {error}
-        </p>
+            Lumenre Results Portal
 
-      )}
+          </h2>
 
-      {
-        results.length === 0 && !error && (
+          <hr />
 
-          <p>
-            No released results available.
+          <h4>
+
+            Welcome,
+
+            {" "}
+
+            {student?.fullName}
+
+          </h4>
+
+          <p className="mb-1">
+
+            <strong>
+
+              Student Number:
+
+            </strong>
+
+            {" "}
+
+            {student?.studentId}
+
           </p>
 
-        )
-      }
+        </div>
+
+      </div>
+
+
+      <h4 className="mb-3">
+
+        My Result Slips
+
+      </h4>
+
 
       {
+
+        error && (
+
+          <div className="alert alert-danger">
+
+            {error}
+
+          </div>
+
+        )
+
+      }
+
+
+      {
+
+        results.length === 0 && !error && (
+
+          <div className="alert alert-info">
+
+            No released result slips are currently available.
+
+          </div>
+
+        )
+
+      }
+
+
+      {
+
         results.map((result)=>(
 
           <div
-          key={result.id}
+
+            key={result._id}
+
+            className="card shadow-sm mb-3"
+
           >
 
-            <h4>
+            <div className="card-body">
 
-              Academic Year:
-              {" "}
-              {result.academicYear}
+              <div className="row">
 
-            </h4>
+                <div className="col-md-8">
 
-            <p>
+                  <p>
 
-              Year {result.year}
-              {" "}
-              Semester {result.semester}
+                    <strong>
 
-            </p>
+                      Academic Year:
 
-            <a
+                    </strong>
 
-            href={result.downloadUrl}
-            target="_blank"
-            rel="noreferrer"
+                    {" "}
 
-            >
+                    {result.academicYear}
 
-              View / Download Result Slip
+                  </p>
 
-            </a>
+                  <p>
+
+                    <strong>
+
+                      Year:
+
+                    </strong>
+
+                    {" "}
+
+                    {result.year}
+
+                  </p>
+
+                  <p>
+
+                    <strong>
+
+                      Semester:
+
+                    </strong>
+
+                    {" "}
+
+                    {result.semester}
+
+                  </p>
+
+                  <p>
+
+                    <strong>
+
+                      Uploaded:
+
+                    </strong>
+
+                    {" "}
+
+                    {
+
+                      new Date(
+
+                        result.createdAt
+
+                      ).toLocaleDateString()
+
+                    }
+
+                  </p>
+
+                </div>
+
+                <div className="col-md-4 d-flex align-items-center">
+
+                  <div className="d-flex gap-2">
+
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => setSelectedPdf(result.downloadUrl)}
+                    >
+
+                    View
+
+                    </button>
+
+                    <a
+                      href={result.downloadUrl}
+                      download={`Result_Year${result.year}_Semester${result.semester}.pdf`}
+                      className="btn btn-success btn-sm"
+                    >
+
+                    Download
+
+                    </a>
+
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+
+                        setSelectedPdf(result.downloadUrl);
+
+                        setTimeout(() => {
+
+                          const iframe = document.getElementById("pdfViewer");
+
+                          iframe.contentWindow.print();
+
+                        }, 500);
+
+                      }}
+                    >
+
+                    Print
+
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
 
           </div>
 
         ))
+
+      }
+      {
+
+      selectedPdf && (
+
+      <div className="card shadow-sm mt-4">
+
+      <div className="card-header d-flex justify-content-between align-items-center">
+
+      <h5 className="mb-0">
+
+        Result Slip Preview
+
+      </h5>
+
+      <button
+        className="btn btn-danger btn-sm"
+        onClick={() => setSelectedPdf("")}
+      >
+
+      Close
+
+      </button>
+
+      </div>
+
+      <div className="card-body p-0">
+
+        <iframe
+
+          id="pdfViewer"
+
+          title="Result Slip"
+
+          src={selectedPdf}
+
+          width="100%"
+
+          height="800"
+
+          style={{
+          border:"none"
+          }}
+
+        >
+
+        </iframe>
+
+      </div>
+
+      </div>
+
+      )
+
       }
 
     </div>
+    
   );
 };
 

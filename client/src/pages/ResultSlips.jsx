@@ -182,6 +182,20 @@ key:"semester",
 label:"Semester"
 },
 
+{
+key:"createdAt",
+label:"Uploaded",
+
+render:(slip)=>(
+
+new Date(
+
+slip.createdAt
+
+).toLocaleDateString()
+
+)
+},
 
 {
 key:"released",
@@ -190,13 +204,24 @@ label:"Status",
 render:(slip)=>(
 
 slip.released
+
 ?
-"Released"
+
+<span className="badge bg-success">
+
+Released
+
+</span>
+
 :
-"Pending"
+
+<span className="badge bg-warning text-dark">
+
+Locked
+
+</span>
 
 )
-
 }
 
 ]}

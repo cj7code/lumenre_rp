@@ -216,21 +216,14 @@ asyncHandler(async(req,res)=>{
   resultSlips.map((slip)=>({
 
     id:slip._id,
-
-    academicYear:
-    slip.academicYear,
-
-    year:
-    slip.year,
-
-    semester:
-    slip.semester,
-
+    academicYear: slip.academicYear,
+    year: slip.year,
+    semester: slip.semester,
+    released: slip.released,
+    createdAt: slip.createdAt,
 
     downloadUrl:
-
     `${req.protocol}://${req.get("host")}/${slip.filePath.replace(/\\/g,"/")}`
-
 
   }));
 
