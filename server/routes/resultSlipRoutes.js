@@ -42,6 +42,7 @@ const {
   getMyResultSlips,
   getAllResultSlips,
   releaseResultSlip,
+  lockResultSlip,
   deleteResultSlip,
   getDashboardStats,
   getRecentUploads
@@ -132,7 +133,20 @@ router.patch(
   releaseResultSlip
 );
 
-
+/**
+ * Lock result slip
+ *
+ * PATCH /api/result-slips/:id/lock
+ *
+ * Access:
+ * Admin only
+ */
+router.patch(
+  "/:id/lock",
+  protect,
+  authorize("admin"),
+  lockResultSlip
+);
 
 /**
  * Delete result slip

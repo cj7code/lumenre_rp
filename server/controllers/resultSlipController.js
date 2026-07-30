@@ -17,7 +17,6 @@ const fs = require("fs");
 
 const ResultSlip = require("../models/ResultSlip");
 const Student = require("../models/Student");
-const Payment = require("../models/Payment");
 
 const asyncHandler =
 require("../middleware/asyncHandler");
@@ -119,13 +118,28 @@ async (req,res)=>{
     {
 
       student,
+
       academicYear,
+
       year,
+
       semester,
 
-      filePath: `uploads/results/${req.file.filename}`,
 
-      released:false
+      filePath:
+      `uploads/results/${req.file.filename}`,
+
+
+      // Keep previous release status
+      // New uploads remain locked
+      // Existing released results stay released
+
+      released:
+      existingSlip
+      ?
+      existingSlip.released
+      :
+      false
 
     },
 
@@ -156,83 +170,85 @@ async (req,res)=>{
 
 });
 
-// ==========================================================
-// Student View Results
-//
-// GET /api/result-slips/my-results
-//
-// Student only
-// ==========================================================
+/**
+ * ==========================================================
+ * Student: Get released result slips
+ *
+ * GET /api/result-slips/my-results
+ *
+ * Returns only results released by admin.
+ * ==========================================================
+ */
+
+const getMyResultSlips = asyncHandler(async (req,res)=>{
 
 
-const getMyResultSlips =
-asyncHandler(async(req,res)=>{
+  // JWT Middleware stores decoded token here
+  const studentId =
+  req.user?.id || req.student?._id;
 
 
-  const payment =
-  await Payment.findOne({
+  // Check authentication
+  if(!studentId){
 
-    student:req.user.id
-
-  });
-
-
-
-  if(
-    !payment ||
-    !payment.fullyPaid
-  ){
-
-    return res.status(403).json({
+    return res.status(401).json({
 
       success:false,
-      status:"fail",
+
       message:
-      "Results are locked. Please clear your outstanding fees."
+      "Student authentication required."
 
     });
 
   }
 
 
+  const resultSlips = await ResultSlip.find({
 
-  const resultSlips =
-  await ResultSlip.find({
-
-    student:req.user.id,
-    released:true
+    student: studentId
 
   })
   .sort({
 
     year:1,
+
     semester:1
 
   });
 
 
+  const results = resultSlips.map((slip)=>({
 
-  const results =
-  resultSlips.map((slip)=>({
+    _id: slip._id,
 
-    id:slip._id,
-    academicYear: slip.academicYear,
-    year: slip.year,
-    semester: slip.semester,
-    released: slip.released,
-    createdAt: slip.createdAt,
+    academicYear:
+    slip.academicYear,
+
+    year:
+    slip.year,
+
+    semester:
+    slip.semester,
+
+    released:
+    slip.released,
+
+    createdAt:
+    slip.createdAt,
+
 
     downloadUrl:
-    `${req.protocol}://${req.get("host")}/${slip.filePath.replace(/\\/g,"/")}`
+    `${process.env.SERVER_URL}/${slip.filePath.replace(/\\/g,"/")}`
 
   }));
-
 
 
   res.status(200).json({
 
     success:true,
+
     count:results.length,
+
     data:results
 
   });
@@ -280,15 +296,19 @@ asyncHandler(async(req,res)=>{
 
 });
 
-// ==========================================================
-// Release Result Slip
-//
-// PATCH /api/result-slips/:id/release
-//
-// ==========================================================
+/**
+ * ==========================================================
+ * Release Result Slip
+ *
+ * PATCH /api/result-slips/:id/release
+ *
+ * Admin manually releases results.
+ * ==========================================================
+ */
 
 const releaseResultSlip =
 asyncHandler(async(req,res)=>{
+
 
   const resultSlip =
   await ResultSlip.findById(
@@ -309,40 +329,17 @@ asyncHandler(async(req,res)=>{
 
   }
 
-  // Check student payment
-  const payment =
-  await Payment.findOne({
 
-    student:
-    resultSlip.student
+  resultSlip.released = true;
 
-  });
-
-
-
-  if(
-    !payment ||
-    !payment.fullyPaid
-  ){
-
-    return res.status(403).json({
-
-      success:false,
-      message:
-      "Cannot release result. Student has outstanding fees."
-
-    });
-
-  }
-
-
-  resultSlip.released=true;
 
   await resultSlip.save();
+
 
   res.status(200).json({
 
     success:true,
+
     message:
     "Result released successfully.",
 
@@ -354,7 +351,49 @@ asyncHandler(async(req,res)=>{
 });
 
 
+/**
+ * ==========================================================
+ * Lock Result Slip
+ * PATCH /api/result-slips/:id/lock
+ * ==========================================================
+ */
 
+const lockResultSlip = asyncHandler(async (req, res) => {
+
+  const slip = await ResultSlip.findByIdAndUpdate(
+
+    req.params.id,
+
+    {
+      released: false
+    },
+
+    {
+      new: true
+    }
+
+  );
+
+  if (!slip) {
+
+    return res.status(404).json({
+
+      success: false,
+      message: "Result slip not found."
+
+    });
+
+  }
+
+  res.status(200).json({
+
+    success: true,
+    message: "Result slip locked successfully.",
+    data: slip
+
+  });
+
+});
 
 
 // ==========================================================
@@ -481,6 +520,7 @@ module.exports = {
   getMyResultSlips,
   getAllResultSlips,
   releaseResultSlip,
+  lockResultSlip,
   deleteResultSlip,
   getDashboardStats,
   getRecentUploads

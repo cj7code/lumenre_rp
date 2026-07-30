@@ -22,11 +22,13 @@ import {
 
 import AdminLayout from "./layouts/AdminLayout";
 
+import Home from "./pages/Home";
 import StudentLogin from "./pages/StudentLogin";
 import StudentDashboard from "./pages/StudentDashboard";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminResults from "./pages/AdminResults";
 import Students from "./pages/Students";
 import UploadResultSlip from "./pages/UploadResultSlip";
 import ResultSlips from "./pages/ResultSlips";
@@ -46,11 +48,22 @@ function App(){
         ================================================== */}
         <Route
           path="/"
-          element={<StudentLogin />}
+          element={<Home />}
+          />
+          
+        <Route
+          path="/student/dashboard"
+          element={
+            <StudentDashboard />}
         />
 
         <Route
-          path="/student/dashboard"
+          path="/student/login"
+          element={<StudentLogin />}
+/>
+
+        <Route
+          path="/student/login"
           element={<StudentDashboard />}
         />
 
@@ -72,6 +85,11 @@ function App(){
           <Route
             path="/admin/dashboard"
             element={<AdminDashboard />}
+          />
+
+          <Route
+            path="/admin/results"
+            element={<AdminResults />}
           />
 
           <Route

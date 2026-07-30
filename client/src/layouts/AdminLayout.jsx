@@ -20,7 +20,7 @@ const AdminLayout = () => {
 
     logoutAdmin();
 
-    navigate("/admin");
+    navigate("/");
 
   };
 
