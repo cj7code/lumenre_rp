@@ -636,64 +636,31 @@ const StudentDashboard = () => {
               {
                 selectedResult.released ? (
 
-
                   <iframe
-
-                    title="Student Result Slip"
-
-                    src={selectedResult.downloadUrl}
-
-                    width="100%"
-
-                    height="800"
-
-                    style={{
-
-                      border:"none"
-
-                    }}
-
-                  />
-
-
+                    id="pdfViewer"
+                    title="Result Slip"
+                    src={selectedPdf}
+                    className="pdf-preview"
+                  >
+                  </iframe>
 
                 ) : (
 
-
-
                   <div className="alert alert-warning">
-
-
                     <h5>
-
                       Results Not Released
-
                     </h5>
-
-
                     <p className="mb-0">
-
-
                       Your results for this semester have not
-
                       been released because of outstanding
-
                       fees. Please clear your balance and
-
                       contact administration for assistance.
-
-
                     </p>
-
-
                   </div>
-
-
 
                 )
 
               }
-
 
             </div>
 
