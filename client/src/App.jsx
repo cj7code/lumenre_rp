@@ -1,17 +1,10 @@
 /**
  * ==========================================================
- * File: App.jsx
+ * App.jsx
  * ----------------------------------------------------------
  * Main application routing configuration.
- *
- * Handles:
- * - Student authentication routes
- * - Student dashboard
- * - Admin authentication routes
- * - Admin protected pages
  * ==========================================================
  */
-
 
 import {
   BrowserRouter,
@@ -19,106 +12,99 @@ import {
   Route
 } from "react-router-dom";
 
-
-import AdminLayout from "./layouts/AdminLayout";
-
 import Home from "./pages/Home";
 import StudentLogin from "./pages/StudentLogin";
 import StudentDashboard from "./pages/StudentDashboard";
 
 import AdminLogin from "./pages/AdminLogin";
+import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
-import AdminResults from "./pages/AdminResults";
-import Students from "./pages/Students";
 import UploadResultSlip from "./pages/UploadResultSlip";
+import AdminResults from "./pages/AdminResults";
 import ResultSlips from "./pages/ResultSlips";
+import Students from "./pages/Students";
 import Payments from "./pages/Payments";
 
-
-
-function App(){
+function App() {
 
   return (
 
     <BrowserRouter>
 
       <Routes>
-        {/* ==================================================
-            Student Routes
-        ================================================== */}
+
+        {/* Public */}
+
         <Route
           path="/"
           element={<Home />}
-          />
-          
-        <Route
-          path="/student/dashboard"
-          element={
-            <StudentDashboard />}
         />
 
         <Route
           path="/student/login"
           element={<StudentLogin />}
-/>
+        />
 
         <Route
-          path="/student/login"
+          path="/student/dashboard"
           element={<StudentDashboard />}
         />
 
-        {/* ==================================================
-            Admin Login
-        ================================================== */}
         <Route
-          path="/admin"
+          path="/admin/login"
           element={<AdminLogin />}
         />
 
-        {/* ==================================================
-            Admin Dashboard Layout
-        ================================================== */}
+        {/* Admin */}
+
         <Route
+          path="/admin"
           element={<AdminLayout />}
         >
 
           <Route
-            path="/admin/dashboard"
+            index
             element={<AdminDashboard />}
           />
 
           <Route
-            path="/admin/results"
-            element={<AdminResults />}
+            path="dashboard"
+            element={<AdminDashboard />}
           />
 
           <Route
-            path="/admin/upload"
+            path="upload"
             element={<UploadResultSlip />}
           />
 
           <Route
-            path="/admin/students"
+            path="results"
+            element={<AdminResults />}
+          />
+
+          <Route
+            path="students"
             element={<Students />}
           />
 
           <Route
-            path="/admin/payments"
+            path="payments"
             element={<Payments />}
           />
 
           <Route
-            path="/admin/results"
+            path="result-slips"
             element={<ResultSlips />}
           />
 
         </Route>
+
       </Routes>
+
     </BrowserRouter>
 
   );
 
 }
-
 
 export default App;

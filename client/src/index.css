@@ -1,66 +1,46 @@
-/* ==========================================================
-   Global Styles
-   Lumenre Results Portal
-========================================================== */
+/**
+ * ==========================================================
+ * index.css
+ *
+ * Global Tailwind CSS styles
+ * ==========================================================
+ */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
 
-html,
-body,
-#root {
-  min-height: 100%;
-}
+@import "tailwindcss";
+
+
+/* Global application defaults */
 
 body {
-  margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f7fb;
-  color: #212529;
-  overflow-x: hidden;
+
+  margin:0;
+
+  font-family:
+  Inter,
+  system-ui,
+  -apple-system,
+  sans-serif;
+
+  background:#f8fafc;
+
+  color:#0f172a;
+
 }
 
-a {
-  text-decoration: none;
+
+/* Prevent horizontal scrolling on phones */
+
+html,
+body {
+
+  overflow-x:hidden;
+
 }
 
-img {
-  max-width: 100%;
-  display: block;
-}
 
-iframe {
-  width: 100%;
-  border: none;
-}
+button {
 
-.table {
-  margin-bottom: 0;
-}
+  cursor:pointer;
 
-.card {
-  border: none;
-  border-radius: 12px;
-}
-
-.btn {
-  border-radius: 8px;
-}
-
-.container,
-.container-fluid {
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-
-/* Smooth page transitions */
-
-.card,
-.btn,
-.form-control,
-.form-select {
-  transition: all .2s ease;
 }
