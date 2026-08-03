@@ -14,33 +14,17 @@
  * - Displays withheld result messages
  * - Secure student logout
  *
- * Note:
- * Download and Print buttons are removed because the
- * browser PDF viewer already provides these options.
  * ==========================================================
  */
 
-
-import {
-  useEffect,
-  useState,
-  useContext
-} from "react";
-
-import {
-  useNavigate
-} from "react-router-dom";
+import { useEffect,useState,useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 import API from "../api/axios";
-
-import {
-  StudentAuthContext
-} from "../context/StudentAuthContext";
-
+import { StudentAuthContext } from "../context/StudentAuthContext";
 
 
 const StudentDashboard = () => {
-
 
   const {
     student,
@@ -49,207 +33,105 @@ const StudentDashboard = () => {
   } = useContext(StudentAuthContext);
 
 
-
   const navigate = useNavigate();
 
 
+  const [results,setResults] = useState([]);
+  const [loading,setLoading] = useState(true);
+  const [error,setError] = useState("");
 
-  /**
-   * ----------------------------------------------------------
-   * Student logout
-   * ----------------------------------------------------------
-   */
+  const [selectedAcademicYear,setSelectedAcademicYear] = useState("");
+  const [selectedYear,setSelectedYear] = useState("");
+  const [selectedSemester,setSelectedSemester] = useState("");
+  const [selectedResult,setSelectedResult] = useState(null);
+
+
 
   const handleLogout = () => {
 
     logoutStudent();
-
     navigate("/");
 
   };
 
 
 
-  /**
-   * ----------------------------------------------------------
-   * Component states
-   * ----------------------------------------------------------
-   */
-
-  const [results, setResults] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-
-  const [error, setError] = useState("");
-
-  const [selectedAcademicYear, setSelectedAcademicYear] = useState("");
-
-  const [selectedYear, setSelectedYear] = useState("");
-
-  const [selectedSemester, setSelectedSemester] = useState("");
-
-  const [selectedResult, setSelectedResult] = useState(null);
-
-
-
-  /**
-   * ----------------------------------------------------------
-   * Load student results from backend
-   *
-   * Backend should return:
-   *
-   * {
-   * academicYear,
-   * year,
-   * semester,
-   * released,
-   * downloadUrl
-   * }
-   *
-   * ----------------------------------------------------------
-   */
-
   useEffect(() => {
 
-
-    const fetchResults = async () => {
-
+    const fetchResults = async() => {
 
       try {
 
-
         const response = await API.get(
-
           "/result-slips/my-results",
-
           {
-
-            headers: {
-
-              Authorization:
-              `Bearer ${studentToken}`
-
+            headers:{
+              Authorization:`Bearer ${studentToken}`
             }
-
           }
-
         );
 
-
-        setResults(
-
-          response.data.data
-
-        );
+        setResults(response.data.data);
 
 
-      } catch (error) {
-
+      } catch(error) {
 
         setError(
-
           error.response?.data?.message ||
-
           "Unable to load results"
-
         );
 
 
       } finally {
 
-
         setLoading(false);
 
       }
 
-
     };
 
 
-
     if(studentToken){
-
       fetchResults();
-
     }
 
-
-  }, [studentToken]);
-
+  },[studentToken]);
 
 
-
-
-  /**
-   * ----------------------------------------------------------
-   * Search selected result
-   *
-   * Checks:
-   * - Academic year
-   * - Year of study
-   * - Semester
-   *
-   * ----------------------------------------------------------
-   */
 
   const showResult = () => {
 
-
-    const result = results.find(
-
-      item =>
-
+    const result = results.find(item =>
       item.academicYear === selectedAcademicYear &&
-
       item.year.toString() === selectedYear &&
-
       item.semester.toString() === selectedSemester
-
     );
-
 
 
     if(!result){
 
-
       setSelectedResult(null);
 
-
-      alert(
-
-        "No result record found for this selection."
-
-      );
-
+      alert("No result record found for this selection.");
 
       return;
-
 
     }
 
 
     setSelectedResult(result);
 
-
   };
 
 
 
-
-  /**
-   * ----------------------------------------------------------
-   * Loading screen
-   * ----------------------------------------------------------
-   */
-
   if(loading){
-
 
     return (
 
-      <div className="container mt-5">
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
 
-        <h4>
+        <h4 className="text-lg font-semibold text-slate-700">
           Loading results...
         </h4>
 
@@ -261,66 +143,52 @@ const StudentDashboard = () => {
 
 
 
-
   return (
 
-    <div className="container mt-4">
+    <div className="min-h-screen bg-slate-100 p-4 md:p-8">
 
 
-      {/* ===============================
-          Student Profile
-      ================================= */}
+      {/* Student Profile */}
+
+      <div className="mb-6 rounded-xl bg-white p-6 shadow">
+
+        <div className="flex flex-col justify-between gap-4 md:flex-row">
 
 
-      <div className="card shadow-sm mb-4">
+          <div>
 
-        <div className="card-body">
-
-
-          <div className="d-flex justify-content-between">
-
-
-            <div>
-
-              <h2>
-                Lumenre Results Portal
-              </h2>
+            <h2 className="text-2xl font-bold text-slate-800">
+              Lumenre Results Portal
+            </h2>
 
 
-              <h5>
-                Welcome, {student?.fullName}
-              </h5>
+            <h5 className="mt-2 text-lg text-slate-700">
+              Welcome, {student?.fullName}
+            </h5>
 
 
-              <p className="mb-0">
+            <p className="text-slate-600">
 
-                <strong>
-                  Student Number:
-                </strong>{" "}
+              <strong>Student Number:</strong>{" "}
+              {student?.studentId}
 
-                {student?.studentId}
-
-              </p>
-
-
-            </div>
-
-
-
-            <button
-
-              className="btn btn-outline-danger"
-
-              onClick={handleLogout}
-
-            >
-
-              Logout
-
-            </button>
+            </p>
 
 
           </div>
+
+
+          <button
+
+            onClick={handleLogout}
+
+            className="rounded-lg border border-red-600 px-5 py-2 font-semibold text-red-600 hover:bg-red-600 hover:text-white"
+
+          >
+
+            Logout
+
+          </button>
 
 
         </div>
@@ -329,259 +197,155 @@ const StudentDashboard = () => {
 
 
 
+      {error && (
 
+        <div className="mb-6 rounded-lg bg-red-100 p-4 text-red-700">
 
-      {
-        error && (
+          {error}
 
-          <div className="alert alert-danger">
+        </div>
 
-            {error}
-
-          </div>
-
-        )
-      }
+      )}
 
 
 
 
-      {/* ===============================
-          Result Selection
-      ================================= */}
+      {/* Result Selection */}
+
+      <div className="mb-6 rounded-xl bg-white shadow">
 
 
-      <div className="card shadow-sm mb-4">
+        <div className="border-b p-5">
 
-
-        <div className="card-header">
-
-          <h5 className="mb-0">
+          <h5 className="font-semibold text-slate-800">
             Find My Results
           </h5>
 
         </div>
 
 
-        <div className="card-body">
+        <div className="grid gap-4 p-5 md:grid-cols-3">
 
 
-          <div className="row g-3">
+          <div>
 
+            <label className="mb-1 block text-sm font-medium">
+              Academic Year
+            </label>
 
 
-            {/* Academic Year */}
+            <select
+              className="w-full rounded-lg border p-3"
+              value={selectedAcademicYear}
+              onChange={e=>setSelectedAcademicYear(e.target.value)}
+            >
 
-            <div className="col-md-4">
+              <option value="">
+                Select Academic Year
+              </option>
 
-              <label className="form-label">
 
-                Academic Year
+              {
+                [...new Set(results.map(item=>item.academicYear))]
+                .map(year=>(
 
-              </label>
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
 
+                ))
+              }
 
-              <select
+            </select>
 
-                className="form-select"
+          </div>
 
-                value={selectedAcademicYear}
 
-                onChange={(e)=>
 
-                  setSelectedAcademicYear(
-                    e.target.value
-                  )
+          <div>
 
-                }
+            <label className="mb-1 block text-sm font-medium">
+              Year of Study
+            </label>
 
-              >
 
-                <option value="">
+            <select
 
-                  Select Academic Year
+              className="w-full rounded-lg border p-3"
 
-                </option>
+              value={selectedYear}
 
+              onChange={e=>setSelectedYear(e.target.value)}
 
-                {
-                  [
-                    ...new Set(
+            >
 
-                      results.map(
+              <option value="">
+                Select Year
+              </option>
 
-                        item => item.academicYear
+              <option value="1">Year 1</option>
+              <option value="2">Year 2</option>
+              <option value="3">Year 3</option>
 
-                      )
-
-                    )
-
-                  ]
-
-                  .map(year => (
-
-                    <option
-
-                      key={year}
-
-                      value={year}
-
-                    >
-
-                      {year}
-
-                    </option>
-
-                  ))
-
-                }
-
-
-              </select>
-
-
-            </div>
-
-                        {/* Year of Study */}
-
-            <div className="col-md-4">
-
-              <label className="form-label">
-
-                Year of Study
-
-              </label>
-
-
-              <select
-
-                className="form-select"
-
-                value={selectedYear}
-
-                onChange={(e) =>
-
-                  setSelectedYear(e.target.value)
-
-                }
-
-              >
-
-                <option value="">
-
-                  Select Year
-
-                </option>
-
-
-                <option value="1">
-
-                  Year 1
-
-                </option>
-
-
-                <option value="2">
-
-                  Year 2
-
-                </option>
-
-
-                <option value="3">
-
-                  Year 3
-
-                </option>
-
-
-              </select>
-
-
-            </div>
-
-
-
-
-            {/* Semester */}
-
-            <div className="col-md-4">
-
-              <label className="form-label">
-
-                Semester
-
-              </label>
-
-
-              <select
-
-                className="form-select"
-
-                value={selectedSemester}
-
-                onChange={(e) =>
-
-                  setSelectedSemester(e.target.value)
-
-                }
-
-              >
-
-                <option value="">
-
-                  Select Semester
-
-                </option>
-
-
-                <option value="1">
-
-                  Semester 1
-
-                </option>
-
-
-                <option value="2">
-
-                  Semester 2
-
-                </option>
-
-
-              </select>
-
-
-            </div>
-
-
-
-
-            {/* Search Button */}
-
-            <div className="col-md-12">
-
-
-              <button
-
-                className="btn btn-primary"
-
-                onClick={showResult}
-
-              >
-
-                Show Result
-
-              </button>
-
-
-            </div>
+            </select>
 
 
           </div>
 
 
+
+
+          <div>
+
+            <label className="mb-1 block text-sm font-medium">
+              Semester
+            </label>
+
+
+            <select
+
+              className="w-full rounded-lg border p-3"
+
+              value={selectedSemester}
+
+              onChange={e=>setSelectedSemester(e.target.value)}
+
+            >
+
+              <option value="">
+                Select Semester
+              </option>
+
+              <option value="1">
+                Semester 1
+              </option>
+
+              <option value="2">
+                Semester 2
+              </option>
+
+            </select>
+
+
+          </div>
+
+
+
+          <button
+
+            onClick={showResult}
+
+            className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 md:col-span-3"
+
+          >
+
+            Show Result
+
+          </button>
+
+
         </div>
+
 
       </div>
 
@@ -589,92 +353,79 @@ const StudentDashboard = () => {
 
 
 
-      {/* ===============================
-          Selected Result Display
-      ================================= */}
+      {/* Result Display */}
+
+      {selectedResult && (
+
+        <div className="rounded-xl bg-white shadow">
 
 
-      {
-        selectedResult && (
+          <div className="border-b p-5 font-semibold">
 
+            Result Slip -
 
-          <div className="card shadow-sm mb-4">
+            {" "}
 
+            {selectedResult.academicYear}
 
-            <div className="card-header">
+            {" | Year "}
 
+            {selectedResult.year}
 
-              <h5 className="mb-0">
+            {" | Semester "}
 
-                Result Slip
+            {selectedResult.semester}
 
-                {" - "}
-
-                {selectedResult.academicYear}
-
-                {" | Year "}
-
-                {selectedResult.year}
-
-                {" | Semester "}
-
-                {selectedResult.semester}
-
-
-              </h5>
-
-
-            </div>
+          </div>
 
 
 
+          <div className="p-5">
 
 
-            <div className="card-body">
+            {
+              selectedResult.released ?
 
+              (
 
-              {
-                selectedResult.released ? (
+                <iframe
+                  title="Result Slip"
+                  src={selectedResult.downloadUrl}
+                  className="h-[800px] w-full rounded-lg border"
+                />
 
-                  <iframe
-                    id="pdfViewer"
-                    title="Result Slip"
-                    src={selectedPdf}
-                    className="pdf-preview"
-                  >
-                  </iframe>
+              )
 
-                ) : (
+              :
 
-                  <div className="alert alert-warning">
-                    <h5>
-                      Results Not Released
-                    </h5>
-                    <p className="mb-0">
-                      Your results for this semester have not
-                      been released because of outstanding
-                      fees. Please clear your balance and
-                      contact administration for assistance.
-                    </p>
-                  </div>
+              (
 
-                )
+                <div className="rounded-lg bg-yellow-100 p-5 text-yellow-800">
 
-              }
+                  <h5 className="font-bold">
+                    Results Not Released
+                  </h5>
 
-            </div>
+                  <p>
+                    Your results for this semester have not been released because of outstanding fees. Please clear your balance and contact administration.
+                  </p>
+
+                </div>
+
+              )
+
+            }
 
 
           </div>
 
 
-        )
+        </div>
 
-      }
+      )}
 
 
     </div>
-
 
   );
 

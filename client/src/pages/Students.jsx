@@ -10,37 +10,45 @@ import { useContext, useEffect, useState } from "react";
 import API from "../api/axios";
 import { AdminAuthContext } from "../context/AdminAuthContext";
 
+
 const Students = () => {
 
   const { adminToken } = useContext(AdminAuthContext);
-  const [students, setStudents] = useState([]);
+
+  const [students,setStudents] = useState([]);
   const [selectedStudents,setSelectedStudents] = useState([]);
+
   const [page,setPage] = useState(1);
   const [limit,setLimit] = useState(25);
   const [totalPages,setTotalPages] = useState(1);
-  const [totalStudents, setTotalStudents] = useState(0);
-  const [editingStudent,setEditingStudent] = useState(null);
-  const [search, setSearch] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  const [semesterFilter, setSemesterFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [excelFile, setExcelFile] = useState(null);
-  const [message, setMessage] = useState("");
-  const [importing, setImporting] = useState(false);
+  const [totalStudents,setTotalStudents] = useState(0);
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    studentId: "",
-    year: "1",
-    semester: "1"
+  const [editingStudent,setEditingStudent] = useState(null);
+
+  const [search,setSearch] = useState("");
+  const [yearFilter,setYearFilter] = useState("");
+  const [semesterFilter,setSemesterFilter] = useState("");
+  const [statusFilter,setStatusFilter] = useState("");
+
+  const [excelFile,setExcelFile] = useState(null);
+  const [message,setMessage] = useState("");
+  const [importing,setImporting] = useState(false);
+
+
+  const [formData,setFormData] = useState({
+    fullName:"",
+    studentId:"",
+    year:"1",
+    semester:"1"
   });
 
 
-  useEffect(() => {
+
+  useEffect(()=>{
 
     loadStudents();
 
-  }, [
+  },[
     adminToken,
     page,
     limit,
@@ -51,47 +59,39 @@ const Students = () => {
   ]);
 
 
-  const loadStudents = async () => {
 
-    try {
+  const loadStudents = async()=>{
+
+    try{
 
       const response = await API.get(
 
         "/students/admin/all",
 
         {
-
-          params: {
-
+          params:{
             page,
-
             limit,
-
             search,
-
-            year: yearFilter,
-
-            semester: semesterFilter,
-
-            status: statusFilter
-
+            year:yearFilter,
+            semester:semesterFilter,
+            status:statusFilter
           },
 
-          headers: {
-
-            Authorization: `Bearer ${adminToken}`
-
+          headers:{
+            Authorization:`Bearer ${adminToken}`
           }
-
         }
 
       );
+
 
       setStudents(response.data.data);
       setTotalPages(response.data.totalPages);
       setTotalStudents(response.data.totalStudents);
 
-    } catch(error) {
+
+    }catch(error){
 
       console.error(error);
 
@@ -100,51 +100,54 @@ const Students = () => {
   };
 
 
-  const handleChange = (e) => {
+
+  const handleChange=(e)=>{
 
     setFormData({
 
       ...formData,
 
-      [e.target.name]: e.target.value
+      [e.target.name]:e.target.value
 
     });
 
   };
 
 
-  const addStudent = async (e) => {
+
+  const addStudent=async(e)=>{
 
     e.preventDefault();
 
-
-    try {
+    try{
 
       await API.post(
+
         "/students",
+
         formData,
+
         {
           headers:{
             Authorization:`Bearer ${adminToken}`
           }
         }
+
       );
 
 
       setFormData({
-
         fullName:"",
         studentId:"",
         year:"1",
         semester:"1"
-
       });
 
 
       loadStudents();
 
 
-    } catch(error){
+    }catch(error){
 
       console.error(error);
 
@@ -153,7 +156,8 @@ const Students = () => {
   };
 
 
-  const toggleStatus = async(id)=>{
+
+  const toggleStatus=async(id)=>{
 
     try{
 
@@ -183,7 +187,9 @@ const Students = () => {
 
   };
 
-  const startEdit = (student)=>{
+
+
+  const startEdit=(student)=>{
 
     setEditingStudent(student);
 
@@ -198,7 +204,11 @@ const Students = () => {
 
   };
 
-  const updateStudent = async(e)=>{e.preventDefault();
+
+
+  const updateStudent=async(e)=>{
+
+    e.preventDefault();
 
     try{
 
@@ -219,14 +229,11 @@ const Students = () => {
 
       setEditingStudent(null);
 
-
       setFormData({
-
         fullName:"",
         studentId:"",
         year:"1",
         semester:"1"
-
       });
 
 
@@ -242,54 +249,9 @@ const Students = () => {
   };
 
 
-  const deleteStudent = async(id)=>{
-
-
-    const confirmDelete =
-    window.confirm(
-      "Delete this student?"
-    );
-
-
-    if(!confirmDelete) return;
-
-
-    try{
-
-      await API.delete(
-
-        `/students/${id}`,
-
-        {
-          headers:{
-            Authorization:`Bearer ${adminToken}`
-          }
-        }
-
-      );
-
-
-      loadStudents();
-
-
-    }catch(error){
-
-      console.error(error);
-
-    }
-
-  };
-
-
-  const handleExcelChange = (e) => {
-
-    setExcelFile(e.target.files[0]);
-
-  };
-
   const importStudents = async () => {
 
-    if (!excelFile) {
+    if(!excelFile){
 
       setMessage("Please select an Excel file.");
 
@@ -303,49 +265,45 @@ const Students = () => {
 
       const formData = new FormData();
 
-      formData.append("file", excelFile);
+      formData.append(
+        "file",
+        excelFile
+      );
 
       const response = await API.post(
-
         "/bulk-students/import",
-
         formData,
-
         {
-          headers: {
-            Authorization: `Bearer ${adminToken}`
+          headers:{
+            Authorization:`Bearer ${adminToken}`
           }
         }
-
       );
+
 
       const result = response.data.data;
 
+
       setMessage(
-
         `Imported: ${result.imported} | ` +
-
         `Duplicates: ${result.duplicates} | ` +
-
         `Errors: ${result.errors}`
-
       );
+
 
       loadStudents();
 
-      setExcelFile(null);
 
-    } catch (error) {
+    }
+    catch(error){
 
       setMessage(
-
         error.response?.data?.message ||
-
         "Import failed."
-
       );
 
-    } finally {
+    }
+    finally{
 
       setImporting(false);
 
@@ -354,57 +312,15 @@ const Students = () => {
   };
 
 
-  const exportStudents = async () => {
+  const handleExcelChange = (e) => {
 
-    try {
-
-      const response = await API.get(
-        "/bulk-students/export",
-
-        {
-
-          responseType: "blob",
-
-          headers: {
-            Authorization:
-            `Bearer ${adminToken}`
-
-          }
-
-        }
-
-      );
-
-      const url =
-        window.URL.createObjectURL(
-
-          new Blob([response.data])
-
-        );
-
-      const link =
-        document.createElement("a");
-
-      link.href = url;
-
-      link.download = "Students.xlsx";
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      link.remove();
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
+  setExcelFile(
+      e.target.files[0]
+    );
 
   };
 
-
-  const toggleStudentSelection = (id)=>{
+  const toggleStudentSelection = (id) => {
 
     setSelectedStudents(prev =>
 
@@ -412,7 +328,9 @@ const Students = () => {
 
       ?
 
-      prev.filter(studentId => studentId !== id)
+      prev.filter(
+        studentId => studentId !== id
+      )
 
       :
 
@@ -426,9 +344,7 @@ const Students = () => {
   };
 
 
-
-  const selectAllStudents = ()=>{
-
+  const selectAllStudents = () => {
 
     if(selectedStudents.length === students.length){
 
@@ -438,9 +354,7 @@ const Students = () => {
     else{
 
       setSelectedStudents(
-
         students.map(student => student._id)
-
       );
 
     }
@@ -448,180 +362,197 @@ const Students = () => {
   };
 
 
-  const bulkAction = async(action)=>{
+  const exportStudents = async () => {
 
+    try {
 
-    if(selectedStudents.length === 0){
-
-      alert("Select students first.");
-
-      return;
-
-    }
-
-
-    try{
-
-
-      if(action === "delete"){
-
-        await API.delete(
-
-          "/students/bulk/delete",
-
-          {
-
-            data:{
-              studentIds:selectedStudents
-            },
-
-            headers:{
-              Authorization:
-              `Bearer ${adminToken}`
-            }
-
+      const response = await API.get(
+        "/bulk-students/export",
+        {
+          responseType:"blob",
+          headers:{
+            Authorization:`Bearer ${adminToken}`
           }
-
-        );
-
-      }
+        }
+      );
 
 
-      else{
+      const url = window.URL.createObjectURL(
+        new Blob([response.data])
+      );
 
 
-        await API.patch(
+      const link = document.createElement("a");
 
-          "/students/bulk/status",
+      link.href = url;
 
-          {
+      link.download = "Students.xlsx";
 
-            studentIds:selectedStudents,
+      document.body.appendChild(link);
 
-            status:
-            action === "activate"
+      link.click();
 
-          },
-
-          {
-
-            headers:{
-              Authorization:
-              `Bearer ${adminToken}`
-            }
-
-          }
-
-        );
-
-      }
+      link.remove();
 
 
-      setSelectedStudents([]);
+    } catch(error) {
 
-      loadStudents();
-
-
-    }
-    catch(error){
-
-      console.error(error);
+      console.error(
+        "Export failed:",
+        error
+      );
 
     }
 
   };
 
 
+
   return (
 
-    <div className="container-fluid">
+    <div className="w-full">
 
 
-      <div className="d-flex justify-content-between mb-3">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+
+
         <div>
-          <h2>Student Management</h2>
-          <p className="text-muted mb-0">
 
-          Showing
+          <h2 className="text-2xl font-bold text-slate-800">
+            Student Management
+          </h2>
 
-          <strong> {students.length} </strong>
 
-          of
+          <p className="text-slate-500">
 
-          <strong> {totalStudents} </strong>
+            Showing
 
-          students
+            <span className="font-semibold mx-1">
+              {students.length}
+            </span>
+
+            of
+
+            <span className="font-semibold mx-1">
+              {totalStudents}
+            </span>
+
+            students
 
           </p>
+
         </div>
 
+
+
         <button
-          className="btn btn-outline-success"
+
+          className="mt-3 md:mt-0 rounded-lg border border-green-600 px-4 py-2 text-green-700 hover:bg-green-600 hover:text-white"
+
           onClick={exportStudents}
-       >
-        Export Students
-       </button>
+
+        >
+
+          Export Students
+
+        </button>
+
+
       </div>
 
-      <div className="card shadow-sm mb-4">
 
-        <div className="card-header">
 
-          <h5>
-            Add New Student
+
+      {/* Add / Edit Student */}
+
+
+      <div className="rounded-xl bg-white shadow mb-6">
+
+
+        <div className="border-b px-6 py-4">
+
+          <h5 className="font-semibold text-lg">
+
+            {editingStudent ? "Edit Student" : "Add New Student"}
+
           </h5>
 
         </div>
 
 
-        <div className="card-body">
+
+        <div className="p-6">
 
 
           <form
+
             onSubmit={
               editingStudent
               ? updateStudent
               : addStudent
             }
-            className="row g-3"
+
+            className="grid grid-cols-1 md:grid-cols-12 gap-4"
+
           >
 
 
-            <div className="col-md-3">
+            <div className="md:col-span-3">
 
               <input
-                className="form-control"
+
+                className="w-full rounded-lg border px-4 py-2"
+
                 name="fullName"
+
                 placeholder="Full Name"
+
                 value={formData.fullName}
+
                 onChange={handleChange}
+
                 required
+
               />
 
             </div>
 
 
-            <div className="col-md-3">
+
+            <div className="md:col-span-3">
 
               <input
-                className="form-control"
+
+                className="w-full rounded-lg border px-4 py-2"
+
                 name="studentId"
+
                 placeholder="Student ID"
+
                 value={formData.studentId}
+
                 onChange={handleChange}
+
                 required
+
               />
 
             </div>
 
 
-            <div className="col-md-2">
+
+            <div className="md:col-span-2">
 
               <select
-                className="form-select"
+
+                className="w-full rounded-lg border px-4 py-2"
+
                 name="year"
+
                 value={formData.year}
+
                 onChange={handleChange}
+
               >
 
                 <option value="1">
@@ -636,18 +567,25 @@ const Students = () => {
                   Year 3
                 </option>
 
+
               </select>
 
             </div>
 
 
-            <div className="col-md-2">
+
+            <div className="md:col-span-2">
 
               <select
-                className="form-select"
+
+                className="w-full rounded-lg border px-4 py-2"
+
                 name="semester"
+
                 value={formData.semester}
+
                 onChange={handleChange}
+
               >
 
                 <option value="1">
@@ -658,16 +596,21 @@ const Students = () => {
                   Semester 2
                 </option>
 
+
               </select>
 
             </div>
 
 
-            <div className="col-md-2">
+
+            <div className="md:col-span-2">
 
               <button
-                className="btn btn-primary w-100"
+
+                className="w-full rounded-lg bg-blue-600 py-2 text-white hover:bg-blue-700"
+
               >
+
                 {
                   editingStudent
                   ?
@@ -675,486 +618,817 @@ const Students = () => {
                   :
                   "Add Student"
                 }
+
               </button>
+
 
               {
-              editingStudent && (
+                editingStudent && (
 
-              <button
-              type="button"
-              className="btn btn-secondary mt-3"
-              onClick={()=>{
+                  <button
 
-              setEditingStudent(null);
+                    type="button"
 
-              setFormData({
+                    className="mt-2 w-full rounded-lg bg-slate-500 py-2 text-white"
 
-              fullName:"",
-              studentId:"",
-              year:"1",
-              semester:"1"
+                    onClick={()=>{
 
-              });
+                      setEditingStudent(null);
 
-              }}
-              >
-              Cancel
-              </button>
+                      setFormData({
+                        fullName:"",
+                        studentId:"",
+                        year:"1",
+                        semester:"1"
+                      });
 
-              )
+                    }}
+
+                  >
+
+                    Cancel
+
+                  </button>
+
+                )
               }
 
 
             </div>
 
+
           </form>
+
 
         </div>
 
+
       </div>
 
-      <div className="card mb-4">
+            {/* Bulk Student Import */}
 
-        <div className="card-body">
+      <div className="rounded-xl bg-white shadow mb-6">
 
-          <h5 className="mb-3">
+
+        <div className="p-6">
+
+
+          <h5 className="mb-4 text-lg font-semibold">
 
             Bulk Student Import
 
           </h5>
 
-          <div className="row">
 
-            <div className="col-md-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+
+
+            <div className="md:col-span-8">
+
 
               <input
+
                 type="file"
+
                 accept=".xlsx,.xls"
-                className="form-control"
+
+                className="w-full rounded-lg border px-4 py-2"
+
                 onChange={handleExcelChange}
+
               />
+
 
             </div>
 
-            <div className="col-md-4">
+
+            <div className="md:col-span-4">
+
 
               <button
-                className="btn btn-success w-100"
+
+                className="w-full rounded-lg bg-green-600 py-2 text-white hover:bg-green-700"
+
                 onClick={importStudents}
+
                 disabled={importing}
+
               >
 
                 {
-
                   importing
-                  ? "Importing..."
-                  : "Import Students"
-
+                  ?
+                  "Importing..."
+                  :
+                  "Import Students"
                 }
 
+
               </button>
+
+
               <a
+
                 href="/StudentTemplate.xlsx"
-                className="btn btn-outline-primary w-100 mt-2"
+
                 download
+
+                className="mt-2 block w-full rounded-lg border border-blue-600 py-2 text-center text-blue-600 hover:bg-blue-600 hover:text-white"
+
               >
+
                 Download Template
+
               </a>
+
 
             </div>
 
+
           </div>
 
-          {
 
+          {
             message && (
 
-              <div className="alert alert-info mt-3 mb-0">
+              <div className="mt-4 rounded-lg bg-blue-100 px-4 py-3 text-blue-700">
 
                 {message}
 
               </div>
 
             )
-
           }
 
+
         </div>
+
 
       </div>
 
 
-      <div className="row mb-3">
+      {/* Filters */}
 
-        <div className="col-md-3">
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+
+
+        <div className="md:col-span-3">
+
 
           <select
-            className="form-select"
+
+            className="w-full rounded-lg border px-4 py-2"
+
             value={yearFilter}
-            onChange={(e) => {
+
+            onChange={(e)=>{
+
               setYearFilter(e.target.value);
+
               setPage(1);
+
             }}
+
           >
 
-            <option value="">All Years</option>
-            <option value="1">Year 1</option>
-            <option value="2">Year 2</option>
-            <option value="3">Year 3</option>
+            <option value="">
+              All Years
+            </option>
+
+            <option value="1">
+              Year 1
+            </option>
+
+            <option value="2">
+              Year 2
+            </option>
+
+            <option value="3">
+              Year 3
+            </option>
+
 
           </select>
 
+
         </div>
 
-        <div className="col-md-3">
+
+        <div className="md:col-span-3">
+
 
           <select
-            className="form-select"
+
+            className="w-full rounded-lg border px-4 py-2"
+
             value={semesterFilter}
-            onChange={(e) => {
+
+            onChange={(e)=>{
+
               setSemesterFilter(e.target.value);
+
               setPage(1);
+
             }}
+
           >
 
-            <option value="">All Semesters</option>
-            <option value="1">Semester 1</option>
-            <option value="2">Semester 2</option>
+            <option value="">
+              All Semesters
+            </option>
+
+            <option value="1">
+              Semester 1
+            </option>
+
+            <option value="2">
+              Semester 2
+            </option>
+
 
           </select>
 
+
         </div>
 
-        <div className="col-md-3">
+
+        <div className="md:col-span-3">
+
 
           <select
-            className="form-select"
+
+            className="w-full rounded-lg border px-4 py-2"
+
             value={statusFilter}
-            onChange={(e) => {
+
+            onChange={(e)=>{
+
               setStatusFilter(e.target.value);
+
               setPage(1);
+
             }}
+
           >
 
-            <option value="">All Status</option>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
+            <option value="">
+              All Status
+            </option>
+
+            <option value="true">
+              Active
+            </option>
+
+            <option value="false">
+              Inactive
+            </option>
+
 
           </select>
 
+
         </div>
 
-        <div className="col-md-3">
+
+        <div className="md:col-span-3">
+
 
           <button
-            className="btn btn-secondary w-100"
-            onClick={() => {
+
+            className="w-full rounded-lg bg-slate-600 py-2 text-white hover:bg-slate-700"
+
+            onClick={()=>{
 
               setSearch("");
+
               setYearFilter("");
+
               setSemesterFilter("");
+
               setStatusFilter("");
 
             }}
+
           >
 
             Clear Filters
 
+
           </button>
+
 
         </div>
 
+
       </div>
 
+
+      {/* Search */}
+
+
       <input
-        className="form-control mb-3"
+
+        className="mb-4 w-full rounded-lg border px-4 py-2"
+
         placeholder="Search by name or student ID"
+
         value={search}
-        onChange={(e) => {
+
+        onChange={(e)=>{
+
           setSearch(e.target.value);
+
           setPage(1);
+
         }}
+
       />
 
 
-      <div className="mb-3">
+      {/* Bulk Actions */}
+
+
+      <div className="mb-5 flex flex-wrap gap-3">
+
 
         <button
-        className="btn btn-success me-2"
-        onClick={()=>bulkAction("activate")}
+
+          className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+
+          onClick={()=>bulkAction("activate")}
+
         >
-        Activate Selected
+
+          Activate Selected
+
         </button>
 
 
         <button
-        className="btn btn-warning me-2"
-        onClick={()=>bulkAction("deactivate")}
+
+          className="rounded-lg bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600"
+
+          onClick={()=>bulkAction("deactivate")}
+
         >
-        Deactivate Selected
+
+          Deactivate Selected
+
         </button>
 
 
         <button
-        className="btn btn-danger"
-        onClick={()=>bulkAction("delete")}
+
+          className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+
+          onClick={()=>bulkAction("delete")}
+
         >
-        Delete Selected
+
+          Delete Selected
+
         </button>
+
 
       </div>
 
-      <div className="table-responsive">
-        
 
-        <table className="table table-striped">
-          <thead>
+      {/* Students Table */}
+
+
+      <div className="overflow-x-auto rounded-xl bg-white shadow">
+
+
+        <table className="w-full text-left">
+
+
+          <thead className="border-b bg-slate-100">
+
+
             <tr>
-              <th>
+
+
+              <th className="px-4 py-3">
+
+
                 <input
+
                   type="checkbox"
+
                   checked={
-                  selectedStudents.length === students.length &&
-                  students.length > 0
+
+                    selectedStudents.length === students.length &&
+
+                    students.length > 0
+
                   }
+
                   onChange={selectAllStudents}
+
                 />
+
+
               </th>
-              <th>Name</th>
-              <th>Year</th>
-              <th>Semester</th>
-              <th>Status</th>
-              <th>Actions</th>
+
+
+              <th className="px-4 py-3">
+                ID
+              </th>
+
+
+              <th className="px-4 py-3">
+                Name
+              </th>
+
+
+              <th className="px-4 py-3">
+                Year
+              </th>
+
+
+              <th className="px-4 py-3">
+                Semester
+              </th>
+
+
+              <th className="px-4 py-3">
+                Status
+              </th>
+
+
+              <th className="px-4 py-3">
+                Actions
+              </th>
+
+
             </tr>
+
+
           </thead>
 
+
           <tbody>
+                        {
+              students.map((student)=>(
 
-          {
-            students.map((student)=>(
-              <tr key={student._id}>
+                <tr
+                  key={student._id}
+                  className="border-b hover:bg-slate-50"
+                >
 
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedStudents.includes(student._id)}
-                    onChange={() => toggleStudentSelection(student._id)}
-                  />
-                </td>
 
-                <td>
-                  {student.studentId}
-                </td>
+                  <td className="px-4 py-3">
 
-                <td>
-                  {student.fullName}
-                </td>
+                    <input
 
-                <td>
-                  {student.year}
-                </td>
+                      type="checkbox"
 
-                <td>
-                  {student.semester}
-                </td>
+                      checked={
+                        selectedStudents.includes(student._id)
+                      }
 
-                <td>
+                      onChange={()=>toggleStudentSelection(student._id)}
 
-                  {
-                  student.isDeleted
+                    />
 
-                  ?
+                  </td>
 
-                  <span className="badge bg-dark">
-                  Deleted
-                  </span>
 
-                  :
 
-                  student.isActive
+                  <td className="px-4 py-3">
 
-                  ?
+                    {student.studentId}
 
-                  <span className="badge bg-success">
-                  Active
-                  </span>
+                  </td>
 
-                  :
 
-                  <span className="badge bg-warning text-dark">
-                  Inactive
-                  </span>
 
-                  }
+                  <td className="px-4 py-3">
 
-                </td>
+                    {student.fullName}
 
-                <td>
-                  <button
-                  className="btn btn-sm btn-primary me-2"
-                  onClick={()=>startEdit(student)}
-                  >
-                  Edit
-                  </button>
+                  </td>
 
-                  <button
-                    className="btn btn-sm btn-warning me-2"
-                    onClick={()=>toggleStatus(student._id)}
-                  >
+
+
+                  <td className="px-4 py-3">
+
+                    {student.year}
+
+                  </td>
+
+
+
+                  <td className="px-4 py-3">
+
+                    {student.semester}
+
+                  </td>
+
+
+
+                  <td className="px-4 py-3">
+
 
                     {
-                      student.isActive
+                      student.isDeleted
+
                       ?
-                      "Disable"
+
+                      <span className="rounded-full bg-slate-800 px-3 py-1 text-sm text-white">
+
+                        Deleted
+
+                      </span>
+
+
                       :
-                      "Activate"
+
+
+                      student.isActive
+
+
+                      ?
+
+                      <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
+
+                        Active
+
+                      </span>
+
+
+                      :
+
+
+                      <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-700">
+
+                        Inactive
+
+                      </span>
+
                     }
-                  </button>
 
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={()=>deleteStudent(student._id)}
-                  >
-                    Delete
-                  </button>
 
-                </td>
+                  </td>
 
-              </tr>
 
-            ))
 
-          }
+                  <td className="px-4 py-3">
+
+
+                    <div className="flex flex-wrap gap-2">
+
+
+                      <button
+
+                        className="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+
+                        onClick={()=>startEdit(student)}
+
+                      >
+
+                        Edit
+
+                      </button>
+
+
+
+                      <button
+
+                        className="rounded-lg bg-yellow-500 px-3 py-1 text-sm text-white hover:bg-yellow-600"
+
+                        onClick={()=>toggleStatus(student._id)}
+
+                      >
+
+                        {
+                          student.isActive
+                          ?
+                          "Disable"
+                          :
+                          "Activate"
+                        }
+
+
+                      </button>
+
+
+
+                      <button
+
+                        className="rounded-lg bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
+
+                        onClick={()=>deleteStudent(student._id)}
+
+                      >
+
+                        Delete
+
+                      </button>
+
+
+                    </div>
+
+
+                  </td>
+
+
+
+                </tr>
+
+              ))
+
+            }
+
 
           </tbody>
+
+
         </table>
 
-        <div className="d-flex justify-content-between align-items-center mt-3">
 
-          <div>
-
-            <small className="text-muted">
-
-              Showing
-
-              <strong> {students.length} </strong>
-
-              of
-
-              <strong> {totalStudents} </strong>
-
-              students
-
-            </small>
-
-          </div>
+      </div>
 
 
-          <nav>
-
-            <ul className="pagination pagination-sm mb-0">
-
-              <li
-                className={`page-item ${page === 1 ? "disabled" : ""}`}
-              >
-
-                <button
-                  className="page-link"
-                  onClick={() => setPage(page - 1)}
-                >
-
-                  Previous
-
-                </button>
-
-              </li>
-
-              {
-
-                [...Array(totalPages)].map((_, index) => (
-
-                  <li
-                    key={index}
-                    className={`page-item ${page === index + 1 ? "active" : ""}`}
-                  >
-
-                    <button
-                      className="page-link"
-                      onClick={() => setPage(index + 1)}
-                    >
-
-                      {index + 1}
-
-                    </button>
-
-                  </li>
-
-                ))
-
-              }
-
-              <li
-                className={`page-item ${page === totalPages ? "disabled" : ""}`}
-              >
-
-                <button
-                  className="page-link"
-                  onClick={() => setPage(page + 1)}
-                >
-
-                  Next
-
-                </button>
-
-              </li>
-
-            </ul>
-
-          </nav>
 
 
-          <div className="d-flex align-items-center">
 
-            <span className="me-2">
+      {/* Pagination */}
 
-              Rows
+
+      <div className="mt-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+
+        <div>
+
+
+          <small className="text-slate-500">
+
+            Showing
+
+            <span className="mx-1 font-semibold">
+
+              {students.length}
 
             </span>
 
-            <select
+            of
 
-              className="form-select form-select-sm"
+            <span className="mx-1 font-semibold">
 
-              style={{ width: "90px" }}
+              {totalStudents}
 
-              value={limit}
+            </span>
 
-              onChange={(e) => {
+            students
 
-                setLimit(Number(e.target.value));
+          </small>
 
-                setPage(1);
-
-              }}
-
-            >
-
-              <option value="10">10</option>
-
-              <option value="25">25</option>
-
-              <option value="50">50</option>
-
-              <option value="100">100</option>
-
-            </select>
-
-          </div>
 
         </div>
 
+
+
+
+
+        <div className="flex items-center gap-2">
+
+
+          <button
+
+            disabled={page === 1}
+
+            onClick={()=>setPage(page-1)}
+
+            className="rounded-lg border px-3 py-2 disabled:opacity-50"
+
+          >
+
+            Previous
+
+          </button>
+
+
+
+          {
+            [...Array(totalPages)].map((_,index)=>(
+
+
+              <button
+
+                key={index}
+
+                onClick={()=>setPage(index+1)}
+
+                className={
+
+                  `rounded-lg px-3 py-2 
+
+                  ${
+                    page === index + 1
+
+                    ?
+
+                    "bg-blue-600 text-white"
+
+                    :
+
+                    "border"
+
+                  }`
+
+                }
+
+              >
+
+                {index+1}
+
+              </button>
+
+
+            ))
+          }
+
+
+
+          <button
+
+            disabled={page === totalPages}
+
+            onClick={()=>setPage(page+1)}
+
+            className="rounded-lg border px-3 py-2 disabled:opacity-50"
+
+          >
+
+            Next
+
+          </button>
+
+
+        </div>
+
+
+
+
+
+        <div className="flex items-center gap-2">
+
+
+          <span className="text-sm text-slate-600">
+
+            Rows
+
+          </span>
+
+
+
+          <select
+
+            className="rounded-lg border px-3 py-2"
+
+            value={limit}
+
+            onChange={(e)=>{
+
+              setLimit(Number(e.target.value));
+
+              setPage(1);
+
+            }}
+
+          >
+
+            <option value="10">
+              10
+            </option>
+
+            <option value="25">
+              25
+            </option>
+
+            <option value="50">
+              50
+            </option>
+
+            <option value="100">
+              100
+            </option>
+
+
+          </select>
+
+
+        </div>
+
+
       </div>
+
+
     </div>
+
   );
 
 };

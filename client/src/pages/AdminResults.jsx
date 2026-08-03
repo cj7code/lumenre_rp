@@ -7,8 +7,7 @@
  * Administrator Result Management
  *
  * Responsibilities:
- *
- * - View all uploaded result slips
+ * - View uploaded result slips
  * - Release locked results
  * - Lock released results
  * - Search/filter results
@@ -16,40 +15,27 @@
  * ==========================================================
  */
 
-
-import {
-  useEffect,
-  useState,
-  useContext
-} from "react";
-
+import { useEffect,useState,useContext } from "react";
 
 import API from "../api/axios";
-
-
-import {
-  AdminAuthContext
-} from "../context/AdminAuthContext";
-
+import { AdminAuthContext } from "../context/AdminAuthContext";
 
 
 const AdminResults = () => {
 
+  const { adminToken } = useContext(AdminAuthContext);
 
-  const {
-    adminToken
-  } = useContext(AdminAuthContext);
 
   const [results,setResults] = useState([]);
   const [loading,setLoading] = useState(true);
   const [search,setSearch] = useState("");
 
-  // Currently selected PDF for preview
   const [selectedPdf,setSelectedPdf] = useState("");
   const [selectedStudent,setSelectedStudent] = useState("");
 
 
-  const getPdfUrl = (filePath)=>{
+
+  const getPdfUrl = (filePath) => {
 
     return `${import.meta.env.VITE_SERVER_URL}/${filePath.replace(/\\/g,"/")}`;
 
@@ -57,75 +43,46 @@ const AdminResults = () => {
 
 
 
-  /**
-   * Load all result slips
-   */
-
   const loadResults = async()=>{
 
-
     try{
-
 
       const response = await API.get(
 
         "/result-slips/admin/all",
 
         {
-
           headers:{
-
-            Authorization:
-            `Bearer ${adminToken}`
-
+            Authorization:`Bearer ${adminToken}`
           }
-
         }
 
       );
 
 
-      setResults(
-
-        response.data.data
-
-      );
+      setResults(response.data.data);
 
 
-    }
-
-
-    catch(error){
-
+    }catch(error){
 
       console.error(
         "Loading results failed:",
         error
       );
 
-
-    }
-
-
-    finally{
-
+    }finally{
 
       setLoading(false);
 
-
     }
-
 
   };
 
 
 
-
   useEffect(()=>{
 
-
     loadResults();
-
 
   },[]);
 
@@ -133,103 +90,58 @@ const AdminResults = () => {
 
 
 
-  /**
-   * Release result
-   */
-
   const releaseResult = async(id)=>{
-
 
     try{
 
-
       await API.patch(
-
         `/result-slips/${id}/release`,
-
         {},
-
         {
-
           headers:{
-
-            Authorization:
-            `Bearer ${adminToken}`
-
+            Authorization:`Bearer ${adminToken}`
           }
-
         }
-
       );
-
 
       loadResults();
 
 
-    }
-
-
-    catch(error){
-
+    }catch(error){
 
       console.error(error);
 
-
     }
-
 
   };
 
 
 
 
-
-  /**
-   * Lock result
-   */
 
   const lockResult = async(id)=>{
 
-
     try{
 
-
       await API.patch(
-
         `/result-slips/${id}/lock`,
-
         {},
-
         {
-
           headers:{
-
-            Authorization:
-            `Bearer ${adminToken}`
-
+            Authorization:`Bearer ${adminToken}`
           }
-
         }
-
       );
-
 
 
       loadResults();
 
 
-
-    }
-
-
-    catch(error){
-
+    }catch(error){
 
       console.error(error);
 
-
     }
-
 
   };
 
@@ -237,44 +149,22 @@ const AdminResults = () => {
 
 
 
-  /**
-   * Search filtering
-   */
-
-
-  const filteredResults = results.filter((item)=>{
-
+  const filteredResults = results.filter(item=>{
 
     const name =
-
-    item.student?.fullName
-    ?.toLowerCase() || "";
-
-
+      item.student?.fullName?.toLowerCase() || "";
 
     const id =
+      item.student?.studentId?.toLowerCase() || "";
 
-    item.student?.studentId
-    ?.toLowerCase() || "";
-
-
-
-    const searchText =
-
-    search.toLowerCase();
+    const text =
+      search.toLowerCase();
 
 
-
-    return (
-
-      name.includes(searchText)
-
-      ||
-
-      id.includes(searchText)
-
+    return(
+      name.includes(text) ||
+      id.includes(text)
     );
-
 
   });
 
@@ -284,21 +174,17 @@ const AdminResults = () => {
 
   if(loading){
 
-
     return (
 
-      <div className="container mt-5">
+      <div className="p-8">
 
-        <h4>
-
+        <h4 className="font-semibold">
           Loading results...
-
         </h4>
 
       </div>
 
     );
-
 
   }
 
@@ -308,27 +194,20 @@ const AdminResults = () => {
 
   return (
 
-
-    <div className="container-fluid">
-
+    <div className="space-y-6">
 
 
-      <div className="mb-4">
 
+      <div>
 
-        <h2>
-
+        <h2 className="text-3xl font-bold text-slate-800">
           Result Management
-
         </h2>
 
 
-        <p className="text-muted">
-
+        <p className="text-slate-500">
           Release, lock and monitor student results.
-
         </p>
-
 
       </div>
 
@@ -338,36 +217,24 @@ const AdminResults = () => {
 
       {/* Search */}
 
+      <div className="rounded-xl bg-white p-5 shadow">
 
-      <div className="card shadow-sm mb-4">
+        <input
 
+          type="text"
 
-        <div className="card-body">
+          placeholder="Search student name or ID..."
 
+          value={search}
 
-          <input
+          onChange={(e)=>setSearch(e.target.value)}
 
-            type="text"
+          className="w-full rounded-lg border p-3"
 
-            className="form-control"
-
-            placeholder="Search student name or ID..."
-
-            value={search}
-
-            onChange={(e)=>
-
-              setSearch(e.target.value)
-
-            }
-
-          />
-
-
-        </div>
-
+        />
 
       </div>
+
 
 
 
@@ -376,51 +243,52 @@ const AdminResults = () => {
       {/* Results Table */}
 
 
-      <div className="card shadow-sm">
+      <div className="overflow-hidden rounded-xl bg-white shadow">
 
 
-        <div className="table-responsive">
+        <div className="overflow-x-auto">
 
 
-          <table className="table table-hover mb-0">
+          <table className="w-full text-left">
 
 
-            <thead className="table-light">
+            <thead className="bg-slate-100">
 
 
               <tr>
 
-                <th>
+                <th className="px-4 py-3">
                   Student
                 </th>
 
-                <th>
+                <th className="px-4 py-3">
                   Student ID
                 </th>
 
-                <th>
+                <th className="px-4 py-3">
                   Academic Year
                 </th>
 
-                <th>
+                <th className="px-4 py-3">
                   Year
                 </th>
 
-                <th>
+                <th className="px-4 py-3">
                   Semester
                 </th>
 
-                <th>
-                  Status
-                </th>
-
-                <th>
+                <th className="px-4 py-3">
                   Preview
                 </th>
 
-                <th>
+                <th className="px-4 py-3">
+                  Status
+                </th>
+
+                <th className="px-4 py-3">
                   Action
                 </th>
+
 
               </tr>
 
@@ -429,16 +297,13 @@ const AdminResults = () => {
 
 
 
+
+
             <tbody>
 
 
               {
-
-
-                filteredResults.length === 0
-
-
-                ?
+                filteredResults.length === 0 ?
 
 
                 (
@@ -446,15 +311,17 @@ const AdminResults = () => {
                   <tr>
 
                     <td
-                    colSpan="7"
-                    className="text-center py-4"
+                      colSpan="8"
+                      className="py-6 text-center text-slate-500"
                     >
 
                       No results found.
 
                     </td>
 
+
                   </tr>
+
 
                 )
 
@@ -462,98 +329,95 @@ const AdminResults = () => {
                 :
 
 
-                filteredResults.map((result)=>(
+                filteredResults.map(result=>(
 
 
-                  <tr key={result._id}>
+                  <tr
+                    key={result._id}
+                    className="border-t"
+                  >
 
 
-                    <td>
+                    <td className="px-4 py-3">
 
-                      {
-                        result.student?.fullName
-                      }
-
-                    </td>
-
-
-
-                    <td>
-
-                      {
-                        result.student?.studentId
-                      }
+                      {result.student?.fullName}
 
                     </td>
 
 
+                    <td className="px-4 py-3">
 
-                    <td>
-
-                      {
-                        result.academicYear
-                      }
+                      {result.student?.studentId}
 
                     </td>
 
 
+                    <td className="px-4 py-3">
 
-                    <td>
-
-                      {
-                        result.year
-                      }
+                      {result.academicYear}
 
                     </td>
 
 
+                    <td className="px-4 py-3">
 
-                    <td>
+                      {result.year}
+
+                    </td>
+
+
+                    <td className="px-4 py-3">
 
                       Semester {result.semester}
 
                     </td>
 
-                    <td>
 
-                    <button
 
-                    className="btn btn-sm btn-primary"
 
-                    onClick={()=>{
 
-                    setSelectedPdf(
-                        getPdfUrl(result.filePath)
-                    );
+                    <td className="px-4 py-3">
 
-                    setSelectedStudent(
-                        result.student?.fullName
-                    );
 
-                    }}
+                      <button
 
-                    >
+                        className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
 
-                    View PDF
+                        onClick={()=>{
 
-                    </button>
+                          setSelectedPdf(
+                            getPdfUrl(result.filePath)
+                          );
+
+                          setSelectedStudent(
+                            result.student?.fullName
+                          );
+
+                        }}
+
+                      >
+
+                        View PDF
+
+                      </button>
 
 
                     </td>
 
-                    <td>
+
+
+
+
+                    <td className="px-4 py-3">
 
 
                       {
+                        result.released ?
 
-                        result.released
-
-
-                        ?
 
                         (
 
-                          <span className="badge bg-success">
+                          <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
 
                             Released
 
@@ -567,14 +431,13 @@ const AdminResults = () => {
 
                         (
 
-                          <span className="badge bg-warning text-dark">
+                          <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-700">
 
                             Locked
 
                           </span>
 
                         )
-
 
                       }
 
@@ -584,57 +447,53 @@ const AdminResults = () => {
 
 
 
-                    <td>
+
+                    <td className="px-4 py-3">
 
 
-                    {
-
-                      result.released
-
-
-                      ?
+                      {
+                        result.released ?
 
 
-                      (
+                        (
 
-                        <button
+                          <button
 
-                        className="btn btn-sm btn-warning"
+                            className="rounded bg-yellow-500 px-3 py-1 text-sm text-white hover:bg-yellow-600"
 
-                        onClick={()=>lockResult(result._id)}
+                            onClick={()=>lockResult(result._id)}
 
-                        >
+                          >
 
-                          Lock
+                            Lock
 
-                        </button>
-
-
-                      )
+                          </button>
 
 
-                      :
+                        )
 
 
-                      (
-
-                        <button
-
-                        className="btn btn-sm btn-success"
-
-                        onClick={()=>releaseResult(result._id)}
-
-                        >
-
-                          Release
-
-                        </button>
+                        :
 
 
-                      )
+                        (
+
+                          <button
+
+                            className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
+
+                            onClick={()=>releaseResult(result._id)}
+
+                          >
+
+                            Release
+
+                          </button>
 
 
-                    }
+                        )
+
+                      }
 
 
                     </td>
@@ -646,9 +505,7 @@ const AdminResults = () => {
 
                 ))
 
-
               }
-
 
 
             </tbody>
@@ -662,80 +519,78 @@ const AdminResults = () => {
 
       </div>
 
+
+
+
+
+      {/* PDF Preview */}
+
+
       {
-      selectedPdf && (
-
-       <div className="card shadow-sm mt-4">
-
-            <div className="card-header d-flex justify-content-between align-items-center">
+        selectedPdf && (
 
 
-                <h5 className="mb-0">
+          <div className="overflow-hidden rounded-xl bg-white shadow">
 
-                    Result Preview:
 
-                    {" "}
+            <div className="flex items-center justify-between border-b p-5">
 
-                    {selectedStudent}
 
-                </h5>
+              <h5 className="font-semibold">
 
-                <button
+                Result Preview: {selectedStudent}
 
-                    className="btn btn-danger btn-sm"
+              </h5>
 
-                    onClick={()=>{
 
-                    setSelectedPdf("");
+              <button
 
-                    setSelectedStudent("");
+                className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
 
-                    }}
+                onClick={()=>{
 
-                >
+                  setSelectedPdf("");
+                  setSelectedStudent("");
 
-                    Close
+                }}
 
-                </button>
+              >
+
+                Close
+
+              </button>
+
 
             </div>
 
-      <div className="card-body p-0">
 
 
-      <iframe
 
-        title="Result Preview"
+            <iframe
 
-        src={selectedPdf}
+              title="Result Preview"
 
-        width="100%"
+              src={selectedPdf}
 
-        height="800"
+              className="h-[800px] w-full border-0"
 
-        style={{
-
-        border:"none"
-
-        }}
-
-        />
-
-    </div>
+            />
 
 
-    </div>
+          </div>
 
-    )
-    }
+
+        )
+
+      }
+
+
 
     </div>
 
   );
 
-
 };
-
 
 
 export default AdminResults;

@@ -1,148 +1,127 @@
 /**
  * ==========================================================
- * layouts/AdminLayout.jsx
+ * File: layouts/AdminLayout.jsx
  * ----------------------------------------------------------
- * Shared layout for all administrator pages.
+ * Shared administrator layout
+ *
+ * Features
+ * - Responsive sidebar
+ * - Mobile menu
+ * - Sticky header
+ * - Tailwind CSS
  * ==========================================================
  */
 
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useState, useContext } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { FiMenu, FiX } from "react-icons/fi";
 import { AdminAuthContext } from "../context/AdminAuthContext";
+
+const links = [
+  { name: "Dashboard", path: "/admin/dashboard" },
+  { name: "Upload Results", path: "/admin/upload" },
+  { name: "Result Slips", path: "/admin/results" },
+  { name: "Students", path: "/admin/students" },
+  { name: "Payments", path: "/admin/payments" }
+];
 
 const AdminLayout = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { logoutAdmin } = useContext(AdminAuthContext);
+
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
 
     logoutAdmin();
-
     navigate("/");
 
   };
 
   return (
 
-    <div>
+    <div className="min-h-screen bg-slate-100">
 
-      <nav className="navbar navbar-dark bg-primary">
+      {/* ================= Header ================= */}
 
-        <div className="container-fluid">
+      <header className="sticky top-0 z-50 flex items-center justify-between bg-slate-900 px-6 py-4 text-white shadow">
 
-          <span className="navbar-brand">
+        <h1 className="text-xl font-bold">
+          Lumenre Results Portal
+        </h1>
 
-            Lumenre Results Portal
+        <button
+          className="text-2xl md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <FiX /> : <FiMenu />}
+        </button>
 
-          </span>
+      </header>
 
-        </div>
+      <div className="flex">
 
-      </nav>
+        {/* ================= Sidebar ================= */}
 
-      <div className="container-fluid">
+        <aside
+          className={`
+            fixed md:static
+            top-16 left-0
+            h-[calc(100vh-64px)]
+            w-64
+            bg-white
+            shadow-lg
+            transition-transform
+            duration-300
+            z-40
+            ${menuOpen ? "translate-x-0" : "-translate-x-full"}
+            md:translate-x-0
+          `}
+        >
 
-        <div className="row">
+          <nav className="p-5 space-y-2">
 
-          <div className="col-md-2 bg-light min-vh-100 p-3">
+            {links.map((link) => (
 
-            <h5>Admin Panel</h5>
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setMenuOpen(false)}
+                className={`
+                  block rounded-lg px-4 py-3 font-medium transition
+                  ${
+                    location.pathname === link.path
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }
+                `}
+              >
+                {link.name}
+              </Link>
 
-            <hr />
+            ))}
 
-            <ul className="nav flex-column">
+            <button
+              onClick={handleLogout}
+              className="mt-8 w-full rounded-lg bg-red-600 py-3 font-semibold text-white hover:bg-red-700"
+            >
+              Logout
+            </button>
 
-              <li className="nav-item">
+          </nav>
 
-                <Link
-                  className="nav-link"
-                  to="/admin/dashboard"
-                >
+        </aside>
 
-                  Dashboard
+        {/* ================= Content ================= */}
 
-                </Link>
+        <main className="flex-1 p-4 md:ml-64 md:p-8">
 
-              </li>
+          <Outlet />
 
-              <li className="nav-item">
-
-                <Link
-                  className="nav-link"
-                  to="/admin/upload"
-                >
-
-                  Upload Result
-
-                </Link>
-
-              </li>
-
-              <li className="nav-item">
-
-                <Link
-                  className="nav-link"
-                  to="/admin/results"
-                >
-
-                  Result Slips
-
-                </Link>
-
-              </li>
-
-              <li className="nav-item">
-
-                <Link
-                  className="nav-link"
-                  to="/admin/students"
-                >
-
-                  Students
-
-                </Link>
-
-              </li>
-
-              <li className="nav-item">
-
-                <Link
-                className="nav-link"
-                to="/admin/payments"
-                >
-
-                Payments
-
-                </Link>
-
-              </li>
-
-              <li className="nav-item mt-4">
-
-                <button
-                  className="btn btn-danger w-100"
-                  onClick={handleLogout}
-                >
-
-                  Logout
-
-                </button>
-
-              </li>
-
-            </ul>
-
-          </div>
-
-          <div className="col-md-10 p-4">
-
-            <Outlet />
-
-          </div>
-
-        </div>
+        </main>
 
       </div>
 

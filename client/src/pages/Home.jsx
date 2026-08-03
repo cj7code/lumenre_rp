@@ -1,6 +1,6 @@
 /**
  * ==========================================================
- * pages/Home.jsx
+ * File: pages/Home.jsx
  * ----------------------------------------------------------
  * Public landing page for Lumenre Results Portal.
  * Students log in from here.
@@ -10,83 +10,59 @@
 
 import { Link } from "react-router-dom";
 
+
 const Home = () => {
 
   return (
 
-    <div className="container">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
 
-      <div
-        className="row justify-content-center align-items-center"
-        style={{ minHeight: "100vh" }}
-      >
+      <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-xl">
 
-        <div className="col-md-6">
 
-          <div className="card shadow-lg">
+        <div className="text-center">
 
-            <div className="card-body p-5">
+          <h1 className="mb-2 text-3xl font-bold text-slate-800">
+            Lumenre Results Portal
+          </h1>
 
-              <div className="text-center">
 
-                <h1 className="mb-2">
+          <p className="text-slate-500">
+            Secure Student Results Management System
+          </p>
 
-                  Lumenre Results Portal
-
-                </h1>
-
-                <p className="text-muted">
-
-                  Secure Student Results Management System
-
-                </p>
-
-              </div>
-
-              <hr />
-
-              <h4 className="text-center mb-4">
-
-                Student Portal
-
-              </h4>
-
-              <p className="text-center">
-
-                Access your officially released result slips.
-
-              </p>
-
-              <div className="d-grid">
-
-                <Link
-                  to="/student/login"
-                  className="btn btn-primary btn-lg"
-                >
-
-                  Student Login
-
-                </Link>
-
-              </div>
-
-              <hr />
-
-              <div className="text-center">
-
-                <small className="text-muted">
-
-                  Only officially released results are available.
-
-                </small>
-
-              </div>
-
-            </div>
-
-          </div>
 
         </div>
+
+
+        <hr className="my-6" />
+
+
+        <h4 className="mb-4 text-center text-xl font-semibold text-slate-700">
+          Student Portal
+        </h4>
+
+
+        <p className="mb-6 text-center text-slate-600">
+          Access your officially released result slips.
+        </p>
+
+
+        <Link
+          to="/student/login"
+          className="block w-full rounded-lg bg-blue-600 py-3 text-center font-semibold text-white transition hover:bg-blue-700"
+        >
+          Student Login
+        </Link>
+
+
+        <hr className="my-6" />
+
+
+        <p className="text-center text-sm text-slate-500">
+          Only officially released results are available.
+        </p>
+
 
       </div>
 
@@ -95,5 +71,6 @@ const Home = () => {
   );
 
 };
+
 
 export default Home;

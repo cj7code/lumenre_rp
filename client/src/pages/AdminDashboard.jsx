@@ -1,6 +1,6 @@
 /**
  * ==========================================================
- * pages/AdminDashboard.jsx
+ * File: pages/AdminDashboard.jsx
  * ----------------------------------------------------------
  * Lumenre Results Portal
  *
@@ -11,257 +11,386 @@
  * - Display recent result activity
  * - Provide navigation to management pages
  *
- * Note:
- * Result release/lock actions are handled in:
- * pages/AdminResults.jsx
  * ==========================================================
  */
 
-import { useContext, useEffect, useState } from "react";
+import { useContext,useEffect,useState } from "react";
 import { Link } from "react-router-dom";
+
 import API from "../api/axios";
 import { AdminAuthContext } from "../context/AdminAuthContext";
 
+
 const AdminDashboard = () => {
 
-  const { admin, adminToken } = useContext(AdminAuthContext);
+  const { admin,adminToken } = useContext(AdminAuthContext);
 
-  // Dashboard statistics
-  const [stats, setStats] = useState({
-    totalStudents: 0,
-    uploadedResults: 0,
-    releasedResults: 0,
-    pendingResults: 0
+
+  const [stats,setStats] = useState({
+    totalStudents:0,
+    uploadedResults:0,
+    releasedResults:0,
+    pendingResults:0
   });
 
-  // Recent uploads
-  const [recentUploads, setRecentUploads] = useState([]);
 
-  /**
-   * Load dashboard information
-   */
-  useEffect(() => {
+  const [recentUploads,setRecentUploads] = useState([]);
+
+
+
+  useEffect(()=>{
+
     loadDashboard();
-  }, []);
 
-  const loadDashboard = async () => {
+  },[]);
 
-    try {
+
+
+  const loadDashboard = async()=>{
+
+    try{
 
       const config = {
-        headers: {
-          Authorization: `Bearer ${adminToken}`
+        headers:{
+          Authorization:`Bearer ${adminToken}`
         }
       };
+
 
       const [
         statsResponse,
         uploadsResponse
       ] = await Promise.all([
-        API.get("/result-slips/dashboard", config),
-        API.get("/result-slips/recent", config)
+
+        API.get(
+          "/result-slips/dashboard",
+          config
+        ),
+
+        API.get(
+          "/result-slips/recent",
+          config
+        )
+
       ]);
 
+
       setStats(statsResponse.data.data);
-      setRecentUploads(uploadsResponse.data.data);
 
-    } catch (error) {
+      setRecentUploads(
+        uploadsResponse.data.data
+      );
 
-      console.error("Dashboard loading error:", error);
+
+    }catch(error){
+
+      console.error(
+        "Dashboard loading error:",
+        error
+      );
 
     }
 
   };
 
+
+
   return (
 
-    <div className="container-fluid">
+    <div className="space-y-6">
 
-      {/* ======================================================
-          Header
-      ====================================================== */}
 
-      <div className="mb-4">
+      {/* Header */}
 
-        <h2>
+      <div>
+
+        <h2 className="text-3xl font-bold text-slate-800">
+
           Welcome, {admin?.fullName || "Administrator"}
+
         </h2>
 
-        <p className="text-muted mb-0">
+
+        <p className="text-slate-500">
+
           Lumenre Results Portal Administration
+
         </p>
 
       </div>
 
-      {/* ======================================================
-          Dashboard Statistics
-      ====================================================== */}
 
-      <div className="row g-3 mb-4">
+
+
+
+      {/* Statistics Cards */}
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+
 
         <SummaryCard
           title="Total Students"
           value={stats.totalStudents}
         />
 
+
         <SummaryCard
           title="Uploaded Results"
           value={stats.uploadedResults}
         />
 
+
         <SummaryCard
           title="Released Results"
           value={stats.releasedResults}
-          color="text-success"
+          color="text-green-600"
         />
+
 
         <SummaryCard
           title="Locked Results"
           value={stats.pendingResults}
-          color="text-warning"
+          color="text-yellow-600"
         />
+
 
       </div>
 
-      {/* ======================================================
-          Management Shortcuts
-      ====================================================== */}
 
-      <div className="card shadow-sm mb-4">
 
-        <div className="card-header">
 
-          <h5 className="mb-0">
-            Management
-          </h5>
 
-        </div>
+      {/* Management Links */}
 
-        <div className="card-body d-flex flex-wrap gap-3">
+      <div className="rounded-xl bg-white p-6 shadow">
+
+
+        <h5 className="mb-4 text-lg font-semibold text-slate-800">
+
+          Management
+
+        </h5>
+
+
+        <div className="flex flex-wrap gap-3">
+
 
           <Link
             to="/admin/upload"
-            className="btn btn-primary"
+            className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
           >
             Upload Results
           </Link>
 
+
+
           <Link
             to="/admin/results"
-            className="btn btn-success"
+            className="rounded-lg bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700"
           >
             Manage Results
           </Link>
 
+
+
           <Link
             to="/admin/students"
-            className="btn btn-secondary"
+            className="rounded-lg bg-slate-600 px-5 py-3 font-semibold text-white hover:bg-slate-700"
           >
             Students
           </Link>
 
+
         </div>
+
 
       </div>
 
-      {/* ======================================================
-          Recent Activity
-      ====================================================== */}
 
-      <div className="card shadow-sm">
 
-        <div className="card-header">
 
-          <h5 className="mb-0">
+
+      {/* Recent Activity */}
+
+      <div className="overflow-hidden rounded-xl bg-white shadow">
+
+
+        <div className="border-b p-5">
+
+          <h5 className="font-semibold text-slate-800">
+
             Recent Result Activity
+
           </h5>
 
         </div>
 
-        <div className="table-responsive">
 
-          <table className="table table-hover mb-0">
 
-            <thead className="table-light">
+        <div className="overflow-x-auto">
+
+
+          <table className="w-full text-left">
+
+
+            <thead className="bg-slate-100">
+
 
               <tr>
-                <th>Student</th>
-                <th>Student ID</th>
-                <th>Academic Year</th>
-                <th>Year</th>
-                <th>Semester</th>
-                <th>Status</th>
+
+                <th className="px-5 py-3">
+                  Student
+                </th>
+
+                <th className="px-5 py-3">
+                  Student ID
+                </th>
+
+                <th className="px-5 py-3">
+                  Academic Year
+                </th>
+
+                <th className="px-5 py-3">
+                  Year
+                </th>
+
+                <th className="px-5 py-3">
+                  Semester
+                </th>
+
+                <th className="px-5 py-3">
+                  Status
+                </th>
+
               </tr>
+
 
             </thead>
 
+
+
             <tbody>
 
-              {
-                recentUploads.length === 0 ? (
 
-                  <tr>
+            {
+              recentUploads.length === 0 ?
 
-                    <td
-                      colSpan="6"
-                      className="text-center py-4"
-                    >
-                      No recent uploads found.
-                    </td>
+              (
 
-                  </tr>
+                <tr>
 
-                ) : (
+                  <td
+                    colSpan="6"
+                    className="py-6 text-center text-slate-500"
+                  >
 
-                  recentUploads.map((result) => (
+                    No recent uploads found.
 
-                    <tr key={result._id}>
+                  </td>
 
-                      <td>{result.student?.fullName}</td>
+                </tr>
 
-                      <td>{result.student?.studentId}</td>
+              )
 
-                      <td>{result.academicYear}</td>
+              :
 
-                      <td>{result.year}</td>
+              recentUploads.map(result=>(
 
-                      <td>{result.semester}</td>
 
-                      <td>
+                <tr
+                  key={result._id}
+                  className="border-t"
+                >
 
-                        {
-                          result.released ? (
+                  <td className="px-5 py-3">
 
-                            <span className="badge bg-success">
-                              Released
-                            </span>
+                    {result.student?.fullName}
 
-                          ) : (
+                  </td>
 
-                            <span className="badge bg-warning text-dark">
-                              Locked
-                            </span>
 
-                          )
-                        }
+                  <td className="px-5 py-3">
 
-                      </td>
+                    {result.student?.studentId}
 
-                    </tr>
+                  </td>
 
-                  ))
 
-                )
+                  <td className="px-5 py-3">
 
-              }
+                    {result.academicYear}
+
+                  </td>
+
+
+                  <td className="px-5 py-3">
+
+                    {result.year}
+
+                  </td>
+
+
+                  <td className="px-5 py-3">
+
+                    {result.semester}
+
+                  </td>
+
+
+
+                  <td className="px-5 py-3">
+
+
+                    {
+                      result.released ?
+
+                      (
+
+                        <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
+
+                          Released
+
+                        </span>
+
+                      )
+
+                      :
+
+                      (
+
+                        <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-700">
+
+                          Locked
+
+                        </span>
+
+                      )
+
+                    }
+
+
+                  </td>
+
+
+                </tr>
+
+
+              ))
+
+            }
+
 
             </tbody>
 
+
           </table>
+
 
         </div>
 
+
       </div>
+
 
     </div>
 
@@ -269,38 +398,44 @@ const AdminDashboard = () => {
 
 };
 
+
+
+
+
 /**
  * ==========================================================
- * Reusable Dashboard Summary Card
+ * Reusable Summary Card
  * ==========================================================
  */
+
 
 const SummaryCard = ({
   title,
   value,
-  color = ""
+  color=""
 }) => (
 
-  <div className="col-lg-3 col-md-6">
+  <div className="rounded-xl bg-white p-6 text-center shadow">
 
-    <div className="card shadow-sm dashboard-card">
 
-      <div className="card-body text-center">
+    <h6 className="text-sm text-slate-500">
 
-        <h6 className="text-muted">
-          {title}
-        </h6>
+      {title}
 
-        <h2 className={`stat-number ${color}`}>
-          {value}
-        </h2>
+    </h6>
 
-      </div>
 
-    </div>
+    <h2 className={`mt-2 text-3xl font-bold ${color}`}>
+
+      {value}
+
+    </h2>
+
 
   </div>
 
 );
+
+
 
 export default AdminDashboard;
