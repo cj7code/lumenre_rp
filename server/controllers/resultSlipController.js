@@ -8,18 +8,31 @@
  * - Replace existing slips
  * - Admin view all slips
  * - Release results
+ * - Lock results
  * - Delete slips
  * - Student access to released results
  * ==========================================================
  */
 
+
 const fs = require("fs");
 
-const ResultSlip = require("../models/ResultSlip");
-const Student = require("../models/Student");
+
+const ResultSlip =
+require("../models/ResultSlip");
+
+
+const Student =
+require("../models/Student");
+
+
+const createAudit =
+require("../utils/createAudit");
+
 
 const asyncHandler =
 require("../middleware/asyncHandler");
+
 
 // ==========================================================
 // Upload Result Slip
@@ -29,8 +42,9 @@ require("../middleware/asyncHandler");
 // Admin only
 // ==========================================================
 
-const uploadResultSlip = asyncHandler(
-async (req,res)=>{
+
+const uploadResultSlip =
+asyncHandler(async(req,res)=>{
 
 
   const {
@@ -38,14 +52,22 @@ async (req,res)=>{
     academicYear,
     year,
     semester
+
   } = req.body;
 
-  // Check PDF file
+
+  // Check PDF upload
+
   if(!req.file){
+    console.log(
+      "Uploaded file:",
+      req.file
+    );
 
     return res.status(400).json({
 
       success:false,
+
       message:
       "Please upload a PDF result slip."
 
@@ -53,16 +75,19 @@ async (req,res)=>{
 
   }
 
+  // Confirm student exists
 
-  // Verify student exists
   const studentRecord =
   await Student.findById(student);
+
+
 
   if(!studentRecord){
 
     return res.status(404).json({
 
       success:false,
+
       message:
       "Student not found."
 
@@ -70,48 +95,51 @@ async (req,res)=>{
 
   }
 
-  // Check existing result slip
+
+  // Check previous result
+
   const existingSlip =
   await ResultSlip.findOne({
 
     student,
+
     academicYear,
+
     year,
 
     semester
 
   });
 
+  // Remove old PDF if replacing
 
-  // Delete previous PDF
   if(
+
     existingSlip &&
-    existingSlip.filePath
+    existingSlip.filePath &&
+    fs.existsSync(existingSlip.filePath)
+
   ){
 
-    if(
-      fs.existsSync(
-        existingSlip.filePath
-      )
-    ){
-
-      fs.unlinkSync(
-        existingSlip.filePath
-      );
-
-    }
+    fs.unlinkSync(existingSlip.filePath);
 
   }
 
-  // Create or update record
+  // Create/update result record
+
   const resultSlip =
   await ResultSlip.findOneAndUpdate(
 
     {
+
       student,
+
       academicYear,
+
       year,
+
       semester
+
     },
 
 
@@ -127,18 +155,22 @@ async (req,res)=>{
 
 
       filePath:
+
       `uploads/results/${req.file.filename}`,
 
 
       // Keep previous release status
-      // New uploads remain locked
-      // Existing released results stay released
 
       released:
+
       existingSlip
+
       ?
+
       existingSlip.released
+
       :
+
       false
 
     },
@@ -146,23 +178,54 @@ async (req,res)=>{
 
     {
 
-      new:true,
-
+      returnDocument:"after",
       upsert:true,
-
       runValidators:true
 
     }
 
   );
 
+  // ========================================================
+  // Audit Log
+  // ========================================================
+
+  try {
+
+    await createAudit({
+
+      admin:
+      req.user?.id,
+
+      action:
+      "UPLOAD_RESULT",
+
+      description:
+      `Uploaded result slip for ${studentRecord.fullName}`,
+
+      targetId:
+      resultSlip._id
+
+    });
+
+  }
+  catch(error){
+
+    console.log(
+      "Audit creation failed:",
+      error.message
+    );
+
+  }
 
 
   res.status(201).json({
 
     success:true,
+
     message:
     "Result slip uploaded successfully.",
+
     data:resultSlip
 
   });
@@ -170,25 +233,24 @@ async (req,res)=>{
 
 });
 
-/**
- * ==========================================================
- * Student: Get released result slips
- *
- * GET /api/result-slips/my-results
- *
- * Returns only results released by admin.
- * ==========================================================
- */
 
-const getMyResultSlips = asyncHandler(async (req,res)=>{
+// ==========================================================
+// Student Get Results
+// GET /api/result-slips/my-results
+// ==========================================================
 
 
-  // JWT Middleware stores decoded token here
+const getMyResultSlips =
+asyncHandler(async(req,res)=>{
+
+
   const studentId =
-  req.user?.id || req.student?._id;
+
+  req.user?.id ||
+
+  req.student?._id;
 
 
-  // Check authentication
   if(!studentId){
 
     return res.status(401).json({
@@ -203,11 +265,14 @@ const getMyResultSlips = asyncHandler(async (req,res)=>{
   }
 
 
-  const resultSlips = await ResultSlip.find({
+  const resultSlips =
 
-    student: studentId
+  await ResultSlip.find({
+
+    student:studentId
 
   })
+
   .sort({
 
     year:1,
@@ -217,30 +282,42 @@ const getMyResultSlips = asyncHandler(async (req,res)=>{
   });
 
 
-  const results = resultSlips.map((slip)=>({
 
-    _id: slip._id,
+  const results =
+
+  resultSlips.map((slip)=>({
+
+
+    _id:slip._id,
+
 
     academicYear:
     slip.academicYear,
 
+
     year:
     slip.year,
+
 
     semester:
     slip.semester,
 
+
     released:
     slip.released,
+
 
     createdAt:
     slip.createdAt,
 
 
     downloadUrl:
+
     `${process.env.SERVER_URL}/${slip.filePath.replace(/\\/g,"/")}`
 
+
   }));
+
 
 
   res.status(200).json({
@@ -256,45 +333,50 @@ const getMyResultSlips = asyncHandler(async (req,res)=>{
 
 });
 
+
 // ==========================================================
 // Admin View All Result Slips
 //
 // GET /api/result-slips/admin/all
-//
 // ==========================================================
 
 const getAllResultSlips =
+
 asyncHandler(async(req,res)=>{
 
 
-  const slips =
-  await ResultSlip.find()
+const slips =
 
-  .populate(
-    "student",
-    "fullName studentId year semester"
-  )
+await ResultSlip.find()
 
-  .sort({
+.populate(
 
-    createdAt:-1
+"student",
 
-  });
+"fullName studentId year semester"
+
+)
+
+.sort({
+
+createdAt:-1
+
+});
 
 
+res.status(200).json({
 
-  res.status(200).json({
+success:true,
 
-    success:true,
+count:slips.length,
 
-    count:slips.length,
+data:slips
 
-    data:slips
-
-  });
+});
 
 
 });
+
 
 /**
  * ==========================================================
@@ -306,14 +388,10 @@ asyncHandler(async(req,res)=>{
  * ==========================================================
  */
 
-const releaseResultSlip =
-asyncHandler(async(req,res)=>{
-
+const releaseResultSlip = asyncHandler(async(req,res)=>{
 
   const resultSlip =
-  await ResultSlip.findById(
-    req.params.id
-  );
+  await ResultSlip.findById(req.params.id);
 
 
   if(!resultSlip){
@@ -322,8 +400,7 @@ asyncHandler(async(req,res)=>{
 
       success:false,
 
-      message:
-      "Result slip not found."
+      message:"Result slip not found."
 
     });
 
@@ -332,8 +409,29 @@ asyncHandler(async(req,res)=>{
 
   resultSlip.released = true;
 
-
   await resultSlip.save();
+
+
+// Create audit record
+const studentRecord =
+await Student.findById(
+  resultSlip.student
+);
+
+
+await createAudit({
+
+  admin:req.user?.id,
+
+  action:"RELEASE_RESULT",
+
+  description:
+  `Released result slip for ${studentRecord.fullName}`,
+
+  targetId:
+  resultSlip._id
+
+});
 
 
   res.status(200).json({
@@ -350,68 +448,87 @@ asyncHandler(async(req,res)=>{
 
 });
 
+// ==========================================================
+// Lock Result Slip
+// PATCH /api/result-slips/:id/lock
+// ==========================================================
 
-/**
- * ==========================================================
- * Lock Result Slip
- * PATCH /api/result-slips/:id/lock
- * ==========================================================
- */
+const lockResultSlip =
+asyncHandler(async(req,res)=>{
 
-const lockResultSlip = asyncHandler(async (req, res) => {
-
-  const slip = await ResultSlip.findByIdAndUpdate(
+  const slip =
+  await ResultSlip.findByIdAndUpdate(
 
     req.params.id,
 
     {
-      released: false
+      released:false
     },
 
     {
-      new: true
+      new:true
     }
 
   );
 
-  if (!slip) {
+
+  if(!slip){
 
     return res.status(404).json({
 
-      success: false,
-      message: "Result slip not found."
+      success:false,
+
+      message:"Result slip not found."
 
     });
 
   }
 
+
+  // Audit
+
+  const studentRecord =
+  await Student.findById(
+    slip.student
+  );
+
+
+  await createAudit({
+
+    admin:req.user?.id,
+
+    action:"LOCK_RESULT",
+
+    description:
+    `Locked result slip for ${studentRecord.fullName}`,
+
+    targetId:slip._id
+
+  });
+
+
   res.status(200).json({
 
-    success: true,
-    message: "Result slip locked successfully.",
-    data: slip
+    success:true,
+
+    message:"Result slip locked successfully.",
+
+    data:slip
 
   });
 
 });
 
-
 // ==========================================================
 // Delete Result Slip
-//
 // DELETE /api/result-slips/:id
-//
 // ==========================================================
-
 
 const deleteResultSlip =
 asyncHandler(async(req,res)=>{
 
-
   const resultSlip =
-  await ResultSlip.findById(
-    req.params.id
-  );
+  await ResultSlip.findById(req.params.id);
 
 
   if(!resultSlip){
@@ -420,99 +537,145 @@ asyncHandler(async(req,res)=>{
 
       success:false,
 
-      message:
-      "Result slip not found."
+      message:"Result slip not found."
 
     });
 
   }
 
+  // Delete physical PDF
   if(
+
     resultSlip.filePath &&
-    fs.existsSync(
-      resultSlip.filePath
-    )
+    fs.existsSync(resultSlip.filePath)
+
   ){
 
-    fs.unlinkSync(
-      resultSlip.filePath
-    );
+    fs.unlinkSync(resultSlip.filePath);
 
   }
 
+
   await resultSlip.deleteOne();
+
+  // Audit
+  const studentRecord =
+  await Student.findById(
+    resultSlip.student
+  );
+
+  await createAudit({
+
+    admin:req.user?.id,
+
+    action:"DELETE_RESULT",
+
+    description:
+    `Deleted result slip for ${studentRecord.fullName}`,
+
+    targetId:resultSlip._id
+
+  });
+
 
   res.status(200).json({
 
     success:true,
-    message:
-    "Result slip deleted successfully."
+
+    message:"Result slip deleted successfully."
 
   });
-
 
 });
 
-/**
- * ==========================================================
- * Admin Dashboard Statistics
- * GET /api/result-slips/dashboard
- * ==========================================================
- */
+// ==========================================================
+// Admin Dashboard Statistics
+// GET /api/result-slips/dashboard
+// ==========================================================
 
-const getDashboardStats = asyncHandler(async (req, res) => {
+const getDashboardStats =
+asyncHandler(async(req,res)=>{
 
-  const totalStudents = await Student.countDocuments();
+  const totalStudents =
+  await Student.countDocuments();
 
-  const uploadedResults = await ResultSlip.countDocuments();
+  const uploadedResults =
+  await ResultSlip.countDocuments();
 
-  const releasedResults = await ResultSlip.countDocuments({
-    released: true
+  const releasedResults =
+  await ResultSlip.countDocuments({
+
+    released:true
+
   });
 
-  const pendingResults = await ResultSlip.countDocuments({
-    released: false
+
+  const pendingResults =
+  await ResultSlip.countDocuments({
+
+    released:false
+
   });
+
 
   res.status(200).json({
-    success: true,
-    data: {
+
+    success:true,
+
+    data:{
+
       totalStudents,
       uploadedResults,
       releasedResults,
       pendingResults
+
     }
+
   });
 
 });
 
-/**
- * ==========================================================
- * Admin: Recent Result Slip Uploads
- * GET /api/result-slips/recent
- * ==========================================================
- */
+// ==========================================================
+// Admin Recent Result Uploads
+// GET /api/result-slips/recent
+// ==========================================================
 
-const getRecentUploads = asyncHandler(async (req, res) => {
+const getRecentUploads =
+asyncHandler(async(req,res)=>{
 
-  const uploads = await ResultSlip.find()
-    .populate(
-      "student",
-      "fullName studentId"
-    )
-    .sort({
-      createdAt: -1
-    })
-    .limit(5);
+  const uploads =
+  await ResultSlip.find()
+
+  .populate(
+
+    "student",
+
+    "fullName studentId"
+
+  )
+
+  .sort({
+
+    createdAt:-1
+
+  })
+
+  .limit(5);
+
 
   res.status(200).json({
 
-    success: true,
-    data: uploads
+    success:true,
+
+    data:uploads
 
   });
 
 });
+
+// ==========================================================
+// Export Controller Functions
+// ==========================================================
 
 module.exports = {
 

@@ -200,6 +200,13 @@ const AdminDashboard = () => {
             Students
           </Link>
 
+          <Link
+            to="/admin/audit"
+            className="rounded-lg bg-purple-600 px-5 py-3 font-semibold text-white hover:bg-purple-700"
+          >
+            Audit Logs
+          </Link>
+
 
         </div>
 

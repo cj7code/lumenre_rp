@@ -19,6 +19,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
+import AuditLogs from "./pages/AuditLogs";
 import UploadResultSlip from "./pages/UploadResultSlip";
 import AdminResults from "./pages/AdminResults";
 import ResultSlips from "./pages/ResultSlips";
@@ -70,6 +71,11 @@ function App() {
           <Route
             path="dashboard"
             element={<AdminDashboard />}
+          />
+
+          <Route
+            path="/admin/audit"
+            element={<AuditLogs />}
           />
 
           <Route

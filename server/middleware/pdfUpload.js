@@ -87,8 +87,10 @@ const storage = multer.diskStorage({
       path.extname(file.originalname);
 
 
+    const timestamp = Date.now();
+
     const fileName =
-      `${studentId}_Y${year}_S${semester}_${academicYear}${extension}`;
+    `${studentId}_Y${year}_S${semester}_${academicYear}_${timestamp}${extension}`;
 
 
     cb(null, fileName);
