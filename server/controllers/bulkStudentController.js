@@ -10,6 +10,7 @@ const XLSX = require("xlsx");
 const Student = require("../models/Student");
 const asyncHandler = require("../middleware/asyncHandler");
 const fs = require("fs");
+const path = require("path");
 
 /**
  * ==========================================================
@@ -37,6 +38,9 @@ const importStudents = asyncHandler(async (req, res) => {
     workbook.Sheets[sheetName]
   );
 
+  console.log("Excel rows:");
+  console.table(rows);
+
   let imported = 0;
   let duplicates = 0;
   let errors = 0;
@@ -47,11 +51,26 @@ const importStudents = asyncHandler(async (req, res) => {
 
     const row = rows[i];
 
-    const studentId = row.studentId?.toString().trim();
-    const fullName = row.fullName?.toString().trim();
+    const studentId =
+      (
+        row.studentId ??
+        row.studentID ??
+        row["Student ID"]
+      )?.toString().trim();
 
-    const year = Number(row.year);
-    const semester = Number(row.semester);
+    const fullName =
+      (
+        row.fullName ??
+        row["Full Name"]
+      )?.toString().trim();
+
+    const year = Number(
+      row.year ?? row["Year"]
+    );
+
+    const semester = Number(
+      row.semester ?? row["Semester"]
+    );
 
     // Student ID required
     if (!studentId) {
@@ -242,7 +261,50 @@ const exportStudents = asyncHandler(async (req, res) => {
 
 });
 
+/**
+ * ==========================================================
+ * Download Student Import Template
+ *
+ * GET /api/bulk-students/template
+ *
+ * Sends the official Excel template from backend.
+ * ==========================================================
+ */
+
+const downloadStudentTemplate = asyncHandler(
+async (req,res)=>{
+
+  const filePath = path.join(
+    __dirname,
+    "../templates/StudentTemplate.xlsx"
+  );
+
+
+  // Check template exists
+  if(!fs.existsSync(filePath)){
+
+    return res.status(404).json({
+
+      success:false,
+
+      message:"Student template not found."
+
+    });
+
+  }
+
+
+  res.download(
+    filePath,
+    "StudentTemplate.xlsx"
+  );
+
+
+});
+  
+
 module.exports = {
   importStudents,
-  exportStudents
+  exportStudents,
+  downloadStudentTemplate
 };

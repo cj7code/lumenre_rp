@@ -13,7 +13,8 @@ const excelUpload = require("../middleware/excelUpload");
 
 const {
   importStudents,
-  exportStudents
+  exportStudents,
+  downloadStudentTemplate
 } = require("../controllers/bulkStudentController");
 
 const {
@@ -35,4 +36,13 @@ router.get(
   authorize("admin"),
   exportStudents
 );
+
+// Download the Excel import student template
+router.get(
+  "/template",
+  protect,
+  authorize("admin"),
+  downloadStudentTemplate
+);
+
 module.exports = router;

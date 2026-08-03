@@ -59,7 +59,7 @@ const Students = () => {
   ]);
 
 
-
+  // Load students from the server
   const loadStudents = async()=>{
 
     try{
@@ -113,8 +113,7 @@ const Students = () => {
 
   };
 
-
-
+  // Add a new student
   const addStudent=async(e)=>{
 
     e.preventDefault();
@@ -156,7 +155,7 @@ const Students = () => {
   };
 
 
-
+  // Toggle status of a student
   const toggleStatus=async(id)=>{
 
     try{
@@ -187,8 +186,7 @@ const Students = () => {
 
   };
 
-
-
+  // Start editing a student
   const startEdit=(student)=>{
 
     setEditingStudent(student);
@@ -206,6 +204,7 @@ const Students = () => {
 
 
 
+  // Update an existing student
   const updateStudent=async(e)=>{
 
     e.preventDefault();
@@ -249,6 +248,64 @@ const Students = () => {
   };
 
 
+  //Download official student import template
+  const downloadTemplate = async()=>{
+
+    try{
+
+      const response = await API.get(
+        "/bulk-students/template",
+        {
+          responseType:"blob",
+
+          headers:{
+            Authorization:
+            `Bearer ${adminToken}`
+          }
+        }
+      );
+
+
+      const url =
+      window.URL.createObjectURL(
+        new Blob([response.data])
+      );
+
+
+      const link =
+      document.createElement("a");
+
+
+      link.href=url;
+
+      link.download=
+      "StudentTemplate.xlsx";
+
+
+      document.body.appendChild(link);
+
+      link.click();
+
+
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+
+
+    }
+    catch(error){
+
+      console.error(
+        "Template download failed:",
+        error
+      );
+
+    }
+
+  };
+
+
+  // Bulk Student Import
   const importStudents = async () => {
 
     if(!excelFile){
@@ -320,6 +377,7 @@ const Students = () => {
 
   };
 
+  // Toggle selection of a student
   const toggleStudentSelection = (id) => {
 
     setSelectedStudents(prev =>
@@ -344,6 +402,7 @@ const Students = () => {
   };
 
 
+  // Select or deselect all students
   const selectAllStudents = () => {
 
     if(selectedStudents.length === students.length){
@@ -362,6 +421,7 @@ const Students = () => {
   };
 
 
+  // Bulk actions: activate, deactivate, delete
   const exportStudents = async () => {
 
     try {
@@ -405,7 +465,6 @@ const Students = () => {
     }
 
   };
-
 
 
   return (
@@ -727,21 +786,12 @@ const Students = () => {
 
               </button>
 
-
-              <a
-
-                href="/StudentTemplate.xlsx"
-
-                download
-
-                className="mt-2 block w-full rounded-lg border border-blue-600 py-2 text-center text-blue-600 hover:bg-blue-600 hover:text-white"
-
+              <button
+              onClick={downloadTemplate}
+              className="w-full mt-2 px-4 py-2 rounded-lg border  border-blue-600 text-blue-600  font-medium hover:bg-blue-600  hover:text-white  transition  duration-200"              
               >
-
-                Download Template
-
-              </a>
-
+              Download Template
+              </button>
 
             </div>
 
