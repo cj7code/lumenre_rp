@@ -1,6 +1,6 @@
 /**
  * ==========================================================
- * File: pages/AdminDashboard.jsx
+ * pages/AdminDashboard.jsx
  * ----------------------------------------------------------
  * Lumenre Results Portal
  *
@@ -205,6 +205,13 @@ const AdminDashboard = () => {
             className="rounded-lg bg-purple-600 px-5 py-3 font-semibold text-white hover:bg-purple-700"
           >
             Audit Logs
+          </Link>
+
+          <Link
+            to="/admin/student-activity"
+            className="rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700"
+          >
+            Student Activity
           </Link>
 
 

@@ -526,59 +526,138 @@ const AdminResults = () => {
       {/* PDF Preview */}
 
 
+      {/* ======================================================
+          PDF PREVIEW MODAL
+          Opens above the page instead of below the table
+      ====================================================== */}
+
+
       {
         selectedPdf && (
 
-
-          <div className="overflow-hidden rounded-xl bg-white shadow">
-
-
-            <div className="flex items-center justify-between border-b p-5">
-
-
-              <h5 className="font-semibold">
-
-                Result Preview: {selectedStudent}
-
-              </h5>
+          <div className="
+            fixed
+            inset-0
+            z-50
+            flex
+            items-center
+            justify-center
+            bg-black/60
+            p-4
+          ">
 
 
-              <button
+            <div className="
+              flex
+              h-[90vh]
+              w-full
+              max-w-5xl
+              flex-col
+              overflow-hidden
+              rounded-2xl
+              bg-white
+              shadow-2xl
+            ">
 
-                className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
 
-                onClick={()=>{
+              {/* Modal Header */}
 
-                  setSelectedPdf("");
-                  setSelectedStudent("");
+              <div className="
+                flex
+                items-center
+                justify-between
+                border-b
+                bg-slate-50
+                px-6
+                py-4
+              ">
 
-                }}
 
-              >
+                <div>
 
-                Close
+                  <h3 className="
+                    text-lg
+                    font-bold
+                    text-slate-800
+                  ">
 
-              </button>
+                    Result Preview
+
+                  </h3>
+
+
+                  <p className="
+                    text-sm
+                    text-slate-500
+                  ">
+
+                    {selectedStudent}
+
+                  </p>
+
+
+                </div>
+
+
+
+                <button
+
+                  onClick={()=>{
+
+                    setSelectedPdf("");
+                    setSelectedStudent("");
+
+                  }}
+
+                  className="
+                    rounded-lg
+                    bg-red-600
+                    px-4
+                    py-2
+                    text-sm
+                    font-semibold
+                    text-white
+                    hover:bg-red-700
+                  "
+
+                >
+
+                  Close
+
+                </button>
+
+
+              </div>
+
+
+
+              {/* PDF Viewer */}
+
+              <div className="flex-1">
+
+
+                <iframe
+
+                  title="Result Preview"
+
+                  src={selectedPdf}
+
+                  className="
+                    h-full
+                    w-full
+                    border-0
+                  "
+
+                />
+
+
+              </div>
 
 
             </div>
 
 
-
-
-            <iframe
-
-              title="Result Preview"
-
-              src={selectedPdf}
-
-              className="h-[800px] w-full border-0"
-
-            />
-
-
           </div>
-
 
         )
 

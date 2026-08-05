@@ -2,24 +2,29 @@
  * ==========================================================
  * middleware/errorHandler.js
  * ----------------------------------------------------------
- * Global error handling middleware.
+ * Global API error handler.
  * ==========================================================
  */
 
 const errorHandler = (err, req, res, next) => {
 
-  const statusCode = err.statusCode || 500;
+  console.error("========== SERVER ERROR ==========");
+  console.error(err.stack || err.message);
+  console.error("===================================");
 
-  res.status(statusCode).json({
+
+  res.status(
+    err.statusCode || 500
+  ).json({
 
     success:false,
 
-    status:err.status || "error",
-
-    message:err.message || "Internal Server Error"
+    message:
+    err.message || "Server Error"
 
   });
 
 };
+
 
 module.exports = errorHandler;

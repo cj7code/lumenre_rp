@@ -25,6 +25,8 @@ require("../models/ResultSlip");
 const Student =
 require("../models/Student");
 
+const createStudentActivity =
+require("../utils/createStudentActivity");
 
 const createAudit =
 require("../utils/createAudit");
@@ -263,6 +265,21 @@ asyncHandler(async(req,res)=>{
     });
 
   }
+
+  // ==========================================================
+  // Student Activity
+  // ==========================================================
+
+  await createStudentActivity({
+
+    student:studentId,
+
+    action:"VIEW_PORTAL",
+
+    description:
+    "Opened results dashboard"
+
+  });
 
 
   const resultSlips =

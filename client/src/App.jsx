@@ -20,6 +20,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
 import AuditLogs from "./pages/AuditLogs";
+import StudentActivity from "./pages/StudentActivity";
 import UploadResultSlip from "./pages/UploadResultSlip";
 import AdminResults from "./pages/AdminResults";
 import ResultSlips from "./pages/ResultSlips";
@@ -76,6 +77,11 @@ function App() {
           <Route
             path="/admin/audit"
             element={<AuditLogs />}
+          />
+
+          <Route
+            path="/admin/student-activity"
+            element={<StudentActivity />}
           />
 
           <Route

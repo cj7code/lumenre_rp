@@ -34,6 +34,7 @@ const connectDB = require("./config/db");
 
 const studentRoutes = require("./routes/studentRoutes");
 const bulkStudentRoutes = require("./routes/bulkStudentRoutes");
+const studentActivityRoutes = require("./routes/studentActivityRoutes");
 const resultSlipRoutes = require("./routes/resultSlipRoutes");
 const auditRoutes = require("./routes/auditRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -107,6 +108,7 @@ app.use(
 
 app.use("/api/students", studentRoutes);
 app.use("/api/bulk-students", bulkStudentRoutes);
+app.use("/api/student-activity", studentActivityRoutes);
 app.use("/api/result-slips", resultSlipRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/payments", paymentRoutes);

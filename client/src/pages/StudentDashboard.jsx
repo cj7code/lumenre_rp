@@ -4,119 +4,221 @@
  * ----------------------------------------------------------
  * Lumenre Results Portal
  *
- * Student dashboard features:
+ * Student Dashboard
  *
+ * Features:
  * - Displays student profile
- * - Allows selecting academic year
- * - Allows selecting year of study
- * - Allows selecting semester
- * - Displays released PDF results
- * - Displays withheld result messages
  * - Secure student logout
+ * - Search results by academic year/year/semester
+ * - Displays released result slips
+ * - Displays locked result messages
+ * - Professional PDF preview modal
  *
  * ==========================================================
  */
 
-import { useEffect,useState,useContext } from "react";
-import { useNavigate } from "react-router-dom";
+
+import {
+  useEffect,
+  useState,
+  useContext
+} from "react";
+
+import {
+  useNavigate
+} from "react-router-dom";
+
 
 import API from "../api/axios";
-import { StudentAuthContext } from "../context/StudentAuthContext";
+
+import PortalLayout from "../components/PortalLayout";
+
+import {
+  StudentAuthContext
+} from "../context/StudentAuthContext";
+
 
 
 const StudentDashboard = () => {
+
 
   const {
     student,
     studentToken,
     logoutStudent
+
   } = useContext(StudentAuthContext);
+
 
 
   const navigate = useNavigate();
 
 
+
   const [results,setResults] = useState([]);
+
   const [loading,setLoading] = useState(true);
+
   const [error,setError] = useState("");
 
-  const [selectedAcademicYear,setSelectedAcademicYear] = useState("");
-  const [selectedYear,setSelectedYear] = useState("");
-  const [selectedSemester,setSelectedSemester] = useState("");
-  const [selectedResult,setSelectedResult] = useState(null);
+
+
+  const [
+    selectedAcademicYear,
+    setSelectedAcademicYear
+  ] = useState("");
+
+  const [
+    selectedYear,
+    setSelectedYear
+  ] = useState("");
+
+  const [
+    selectedSemester,
+    setSelectedSemester
+  ] = useState("");
 
 
 
-  const handleLogout = () => {
+  const [
+    selectedResult,
+    setSelectedResult
+  ] = useState(null);
+
+
+
+  const [
+    pdfOpen,
+    setPdfOpen
+  ] = useState(false);
+
+
+
+
+
+  // ==========================================================
+  // Load Student Results
+  // ==========================================================
+
+  useEffect(()=>{
+
+
+    const loadResults = async()=>{
+
+
+      try{
+
+
+        const response = await API.get(
+
+          "/result-slips/my-results",
+
+          {
+            headers:{
+              Authorization:
+              `Bearer ${studentToken}`
+            }
+          }
+
+        );
+
+
+        setResults(
+          response.data.data
+        );
+
+
+      }
+
+      catch(error){
+
+
+        setError(
+
+          error.response?.data?.message ||
+
+          "Unable to load results."
+
+        );
+
+
+      }
+
+      finally{
+
+        setLoading(false);
+
+      }
+
+
+    };
+
+
+
+    if(studentToken){
+
+      loadResults();
+
+    }
+
+
+  },[studentToken]);
+
+
+
+
+
+
+
+  // ==========================================================
+  // Logout Student
+  // ==========================================================
+
+  const handleLogout = ()=>{
 
     logoutStudent();
+
     navigate("/");
 
   };
 
 
 
-  useEffect(() => {
-
-    const fetchResults = async() => {
-
-      try {
-
-        const response = await API.get(
-          "/result-slips/my-results",
-          {
-            headers:{
-              Authorization:`Bearer ${studentToken}`
-            }
-          }
-        );
-
-        setResults(response.data.data);
-
-
-      } catch(error) {
-
-        setError(
-          error.response?.data?.message ||
-          "Unable to load results"
-        );
-
-
-      } finally {
-
-        setLoading(false);
-
-      }
-
-    };
-
-
-    if(studentToken){
-      fetchResults();
-    }
-
-  },[studentToken]);
 
 
 
-  const showResult = () => {
+
+  // ==========================================================
+  // Search Selected Result
+  // ==========================================================
+
+  const searchResult = ()=>{
+
 
     const result = results.find(item =>
+
       item.academicYear === selectedAcademicYear &&
+
       item.year.toString() === selectedYear &&
+
       item.semester.toString() === selectedSemester
+
     );
+
 
 
     if(!result){
 
       setSelectedResult(null);
 
-      alert("No result record found for this selection.");
+      alert(
+        "No result found for the selected period."
+      );
 
       return;
 
     }
+
 
 
     setSelectedResult(result);
@@ -125,52 +227,106 @@ const StudentDashboard = () => {
 
 
 
+
+
+
+
   if(loading){
+
 
     return (
 
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+      <PortalLayout>
 
-        <h4 className="text-lg font-semibold text-slate-700">
-          Loading results...
-        </h4>
+        <div className="flex flex-1 items-center justify-center">
 
-      </div>
+          <p className="text-slate-600">
+
+            Loading student portal...
+
+          </p>
+
+        </div>
+
+      </PortalLayout>
 
     );
+
 
   }
 
 
 
+
+
+
+
   return (
 
-    <div className="min-h-screen bg-slate-100 p-4 md:p-8">
+    <PortalLayout>
 
 
-      {/* Student Profile */}
+      <div className="
+        mx-auto
+        w-full
+        max-w-5xl
+        space-y-5
+      ">
 
-      <div className="mb-6 rounded-xl bg-white p-6 shadow">
 
-        <div className="flex flex-col justify-between gap-4 md:flex-row">
+
+        {/* ==================================================
+            Student Profile
+        =================================================== */}
+
+
+        <div className="
+          flex
+          flex-col
+          justify-between
+          gap-3
+          rounded-xl
+          bg-white
+          p-5
+          shadow
+          md:flex-row
+          md:items-center
+        ">
 
 
           <div>
 
-            <h2 className="text-2xl font-bold text-slate-800">
-              Lumenre Results Portal
-            </h2>
+
+            <h1 className="
+              text-xl
+              font-bold
+              text-slate-800
+            ">
+
+              Welcome,
+              {" "}
+              {student?.fullName}
+
+            </h1>
 
 
-            <h5 className="mt-2 text-lg text-slate-700">
-              Welcome, {student?.fullName}
-            </h5>
 
+            <p className="
+              text-sm
+              text-slate-500
+            ">
 
-            <p className="text-slate-600">
+              Student ID:
 
-              <strong>Student Number:</strong>{" "}
-              {student?.studentId}
+              <span className="
+                ml-1
+                font-semibold
+                text-slate-700
+              ">
+
+                {student?.studentId}
+
+              </span>
 
             </p>
 
@@ -178,11 +334,25 @@ const StudentDashboard = () => {
           </div>
 
 
+
+
           <button
 
             onClick={handleLogout}
 
-            className="rounded-lg border border-red-600 px-5 py-2 font-semibold text-red-600 hover:bg-red-600 hover:text-white"
+            className="
+              rounded-lg
+              border
+              border-red-500
+              px-4
+              py-2
+              text-sm
+              font-semibold
+              text-red-600
+              transition
+              hover:bg-red-600
+              hover:text-white
+            "
 
           >
 
@@ -191,245 +361,523 @@ const StudentDashboard = () => {
           </button>
 
 
-        </div>
-
-      </div>
-
-
-
-      {error && (
-
-        <div className="mb-6 rounded-lg bg-red-100 p-4 text-red-700">
-
-          {error}
-
-        </div>
-
-      )}
-
-
-
-
-      {/* Result Selection */}
-
-      <div className="mb-6 rounded-xl bg-white shadow">
-
-
-        <div className="border-b p-5">
-
-          <h5 className="font-semibold text-slate-800">
-            Find My Results
-          </h5>
 
         </div>
 
 
-        <div className="grid gap-4 p-5 md:grid-cols-3">
 
 
-          <div>
 
-            <label className="mb-1 block text-sm font-medium">
-              Academic Year
-            </label>
+        {
+          error && (
+
+            <div className="
+              rounded-lg
+              bg-red-100
+              px-4
+              py-3
+              text-sm
+              text-red-700
+            ">
+
+              {error}
+
+            </div>
+
+          )
+        }
 
 
-            <select
-              className="w-full rounded-lg border p-3"
-              value={selectedAcademicYear}
-              onChange={e=>setSelectedAcademicYear(e.target.value)}
-            >
-
-              <option value="">
-                Select Academic Year
-              </option>
 
 
-              {
-                [...new Set(results.map(item=>item.academicYear))]
-                .map(year=>(
 
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
 
-                ))
-              }
 
-            </select>
+        {/* ==================================================
+            Result Search Section
+        =================================================== */}
+
+
+        <div className="
+          rounded-xl
+          bg-white
+          shadow
+        ">
+
+
+
+          <div className="
+            border-b
+            px-5
+            py-4
+          ">
+
+
+            <h2 className="
+              font-semibold
+              text-slate-800
+            ">
+
+              Find Results
+
+            </h2>
+
+
+            <p className="
+              text-sm
+              text-slate-500
+            ">
+
+              Select your academic period.
+
+            </p>
+
 
           </div>
 
 
 
-          <div>
-
-            <label className="mb-1 block text-sm font-medium">
-              Year of Study
-            </label>
 
 
-            <select
+          <div className="
+            grid
+            gap-4
+            p-5
+            md:grid-cols-3
+          ">
 
-              className="w-full rounded-lg border p-3"
+
+            <SelectBox
+
+              label="Academic Year"
+
+              value={selectedAcademicYear}
+
+              setValue={setSelectedAcademicYear}
+
+              options={
+                [
+                  ...new Set(
+                    results.map(
+                      item=>item.academicYear
+                    )
+                  )
+                ]
+              }
+
+            />
+
+
+
+            <SelectBox
+
+              label="Year of Study"
 
               value={selectedYear}
 
-              onChange={e=>setSelectedYear(e.target.value)}
+              setValue={setSelectedYear}
 
-            >
+              options={[
+                "1",
+                "2",
+                "3"
+              ]}
 
-              <option value="">
-                Select Year
-              </option>
+              prefix="Year"
 
-              <option value="1">Year 1</option>
-              <option value="2">Year 2</option>
-              <option value="3">Year 3</option>
-
-            </select>
-
-
-          </div>
+            />
 
 
 
+            <SelectBox
 
-          <div>
-
-            <label className="mb-1 block text-sm font-medium">
-              Semester
-            </label>
-
-
-            <select
-
-              className="w-full rounded-lg border p-3"
+              label="Semester"
 
               value={selectedSemester}
 
-              onChange={e=>setSelectedSemester(e.target.value)}
+              setValue={setSelectedSemester}
 
-            >
+              options={[
+                "1",
+                "2"
+              ]}
 
-              <option value="">
-                Select Semester
-              </option>
+              prefix="Semester"
 
-              <option value="1">
-                Semester 1
-              </option>
-
-              <option value="2">
-                Semester 2
-              </option>
-
-            </select>
+            />
 
 
           </div>
 
 
 
-          <button
 
-            onClick={showResult}
 
-            className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 md:col-span-3"
+          <div className="px-5 pb-5">
 
-          >
 
-            Show Result
+            <button
 
-          </button>
+              onClick={searchResult}
+
+              className="
+                w-full
+                rounded-lg
+                bg-blue-700
+                py-2.5
+                text-sm
+                font-semibold
+                text-white
+                hover:bg-blue-800
+              "
+
+            >
+
+              View Result
+
+            </button>
+
+
+          </div>
 
 
         </div>
+
+
+
+
+
+
+
+        {/* ==================================================
+            Selected Result Header
+        ================================================== */}
+
+        {
+          selectedResult && (
+
+            <div className="rounded-xl bg-white shadow">
+
+
+              <div className="
+                border-b
+                px-5
+                py-4
+                text-center
+              ">
+
+
+                <h2 className="
+                  text-lg
+                  font-bold
+                  text-slate-800
+                ">
+
+                  Result Slip
+
+                </h2>
+
+
+                <p className="
+                  mt-1
+                  text-sm
+                  font-medium
+                  text-slate-500
+                ">
+
+                  {selectedResult.academicYear}
+
+                  {" | Year "}
+
+                  {selectedResult.year}
+
+                  {" | Semester "}
+
+                  {selectedResult.semester}
+
+
+                </p>
+
+
+              </div>
+
+
+              <div className="p-5">
+
+
+                {
+                  selectedResult.released ?
+
+
+                  (
+
+                    <button
+
+                      onClick={()=>setPdfOpen(true)}
+
+                      className="
+                        mx-auto
+                        block
+                        rounded-lg
+                        bg-blue-700
+                        px-6
+                        py-2
+                        text-sm
+                        font-semibold
+                        text-white
+                        transition
+                        hover:bg-blue-800
+                      "
+
+                    >
+
+                      View Result Slip
+
+                    </button>
+
+
+                  )
+
+
+                  :
+
+                  (
+
+                    <div className="
+                      rounded-lg
+                      bg-yellow-100
+                      p-4
+                      text-sm
+                      text-yellow-800
+                    ">
+
+                      <strong>
+                        Results Not Released
+                      </strong>
+
+
+                      <p className="mt-1">
+
+                        Please contact administration.
+
+                      </p>
+
+
+                    </div>
+
+                  )
+
+
+                }
+
+
+              </div>
+
+
+            </div>
+
+          )
+        }
+
+
+
+
+
+
+        {/* ==================================================
+            PDF Modal Viewer
+        =================================================== */}
+
+
+        {
+          pdfOpen && (
+
+
+            <div className="
+              fixed
+              inset-0
+              z-50
+              flex
+              items-center
+              justify-center
+              bg-black/60
+              p-4
+            ">
+
+
+              <div className="
+                h-[90vh]
+                w-full
+                max-w-5xl
+                rounded-xl
+                bg-white
+                p-4
+              ">
+
+
+                <div className="
+                  mb-3
+                  flex
+                  justify-between
+                ">
+
+
+                  <h3 className="font-semibold">
+
+                    Result Slip Preview
+
+                  </h3>
+
+
+                  <button
+
+                    onClick={()=>setPdfOpen(false)}
+
+                    className="
+                      rounded
+                      bg-red-600
+                      px-3
+                      py-1
+                      text-sm
+                      text-white
+                    "
+
+                  >
+
+                    Close
+
+                  </button>
+
+
+                </div>
+
+
+
+
+                <iframe
+
+                  title="Result Slip"
+
+                  src={selectedResult.downloadUrl}
+
+                  className="
+                    h-[80vh]
+                    w-full
+                    rounded-lg
+                    border
+                  "
+
+                />
+
+
+              </div>
+
+
+            </div>
+
+
+          )
+
+        }
+
 
 
       </div>
 
 
+    </PortalLayout>
 
-
-
-      {/* Result Display */}
-
-      {selectedResult && (
-
-        <div className="rounded-xl bg-white shadow">
-
-
-          <div className="border-b p-5 font-semibold">
-
-            Result Slip -
-
-            {" "}
-
-            {selectedResult.academicYear}
-
-            {" | Year "}
-
-            {selectedResult.year}
-
-            {" | Semester "}
-
-            {selectedResult.semester}
-
-          </div>
-
-
-
-          <div className="p-5">
-
-
-            {
-              selectedResult.released ?
-
-              (
-
-                <iframe
-                  title="Result Slip"
-                  src={selectedResult.downloadUrl}
-                  className="h-[800px] w-full rounded-lg border"
-                />
-
-              )
-
-              :
-
-              (
-
-                <div className="rounded-lg bg-yellow-100 p-5 text-yellow-800">
-
-                  <h5 className="font-bold">
-                    Results Not Released
-                  </h5>
-
-                  <p>
-                    Your results for this semester have not been released because of outstanding fees. Please clear your balance and contact administration.
-                  </p>
-
-                </div>
-
-              )
-
-            }
-
-
-          </div>
-
-
-        </div>
-
-      )}
-
-
-    </div>
 
   );
 
+
 };
+
+
+
+
+
+
+// ==========================================================
+// Reusable Select Component
+// ==========================================================
+
+const SelectBox = ({
+  label,
+  value,
+  setValue,
+  options,
+  prefix=""
+}) => (
+
+  <div>
+
+
+    <label className="
+      mb-1
+      block
+      text-sm
+      font-medium
+      text-slate-700
+    ">
+
+      {label}
+
+    </label>
+
+
+    <select
+
+      value={value}
+
+      onChange={
+        e=>setValue(e.target.value)
+      }
+
+      className="
+        h-10
+        w-full
+        rounded-lg
+        border
+        border-slate-300
+        px-3
+        text-sm
+        focus:ring-2
+        focus:ring-blue-200
+      "
+
+    >
+
+
+      <option value="">
+        Select
+      </option>
+
+
+
+      {
+        options.map(option=>(
+
+          <option
+            key={option}
+            value={option}
+          >
+
+            {prefix} {option}
+
+          </option>
+
+        ))
+      }
+
+
+    </select>
+
+
+  </div>
+
+);
+
 
 
 export default StudentDashboard;
