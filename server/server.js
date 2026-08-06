@@ -43,6 +43,7 @@ const resultRoutes = require("./routes/resultRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 
+
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -69,18 +70,131 @@ const app = express();
 
 
 // ==========================================================
+// Trust Proxy
+//
+// Required for deployment platforms like Render.
+// ==========================================================
+
+app.set(
+  "trust proxy",
+  1
+);
+
+
+
+// ==========================================================
+// CORS Configuration
+//
+// Allows:
+// - Local React development
+// - Production frontend deployment
+// - API testing tools
+// ==========================================================
+
+
+const allowedOrigins = [
+
+  "http://localhost:5173",
+
+  process.env.FRONTEND_URL
+
+];
+
+
+
+app.use(
+
+  cors({
+
+    origin:(origin,callback)=>{
+
+
+      // Allow requests from tools like:
+      // Postman / Thunder Client
+
+      if(!origin){
+
+        return callback(
+          null,
+          true
+        );
+
+      }
+
+
+
+      if(
+        allowedOrigins.includes(origin)
+      ){
+
+        return callback(
+          null,
+          true
+        );
+
+      }
+
+
+
+      return callback(
+
+        new Error(
+          "Not allowed by CORS"
+        )
+
+      );
+
+
+    },
+
+
+    methods:[
+
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE"
+
+    ],
+
+
+    allowedHeaders:[
+
+      "Content-Type",
+      "Authorization"
+
+    ],
+
+
+    credentials:true
+
+  })
+
+);
+
+
+
+
+// ==========================================================
 // Global Middleware
 // ==========================================================
 
-app.use(cors());
+app.use(
+  express.json()
+);
 
-app.use(express.json());
 
 app.use(
+
   express.urlencoded({
-    extended: true
+
+    extended:true
+
   })
+
 );
+
 
 
 // ==========================================================
@@ -88,51 +202,121 @@ app.use(
 //
 // Allows browser access to uploaded PDFs:
 //
-// http://localhost:5000/uploads/results/file.pdf
+// Production example:
+// https://lumenre-rp.onrender.com/uploads/results/file.pdf
 //
 // IMPORTANT:
 // This must come before error handling.
 // ==========================================================
 
+
 app.use(
+
   "/uploads",
+
   express.static(
-    path.join(__dirname, "uploads")
+
+    path.join(
+      __dirname,
+      "uploads"
+    )
+
   )
+
 );
+
 
 
 // ==========================================================
 // API Routes
 // ==========================================================
 
-app.use("/api/students", studentRoutes);
-app.use("/api/bulk-students", bulkStudentRoutes);
-app.use("/api/student-activity", studentActivityRoutes);
-app.use("/api/result-slips", resultSlipRoutes);
-app.use("/api/audit", auditRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/test", testRoutes);
-app.use("/api/results", resultRoutes);
-app.use("/api/admin", adminRoutes);
+
+app.use(
+  "/api/students",
+  studentRoutes
+);
+
+
+app.use(
+  "/api/bulk-students",
+  bulkStudentRoutes
+);
+
+
+app.use(
+  "/api/student-activity",
+  studentActivityRoutes
+);
+
+
+app.use(
+  "/api/result-slips",
+  resultSlipRoutes
+);
+
+
+app.use(
+  "/api/audit",
+  auditRoutes
+);
+
+
+app.use(
+  "/api/payments",
+  paymentRoutes
+);
+
+
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+
+app.use(
+  "/api/test",
+  testRoutes
+);
+
+
+app.use(
+  "/api/results",
+  resultRoutes
+);
+
+
+app.use(
+  "/api/admin",
+  adminRoutes
+);
+
+
 
 // ==========================================================
 // Test Route
 // ==========================================================
 
-app.get("/", (req, res) => {
 
-  res.status(200).json({
+app.get(
+  "/",
+  (req,res)=>{
 
-    success: true,
 
-    message:
-    "Welcome to Lumenre Results Portal API 🚀"
+    res.status(200).json({
 
-  });
+      success:true,
 
-});
+      message:
+      "Welcome to Lumenre Results Portal API 🚀"
+
+    });
+
+
+  }
+
+);
+
 
 
 // ==========================================================
@@ -141,23 +325,42 @@ app.get("/", (req, res) => {
 // These MUST always remain LAST.
 // ==========================================================
 
-app.use(notFound);
 
-app.use(errorHandler);
+app.use(
+  notFound
+);
+
+
+app.use(
+  errorHandler
+);
+
 
 
 // ==========================================================
 // Start Server
 // ==========================================================
 
+
 const PORT =
 process.env.PORT || 5000;
 
 
-app.listen(PORT, () => {
 
-  console.log(
-    `🚀 Server running on port ${PORT}`
-  );
+app.listen(
 
-});
+  PORT,
+
+  ()=>{
+
+
+    console.log(
+
+      `🚀 Server running on port ${PORT}`
+
+    );
+
+
+  }
+
+);
