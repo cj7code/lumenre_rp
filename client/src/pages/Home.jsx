@@ -26,9 +26,9 @@ const Home = () => {
               Branding
           ====================================================== */}
 
-          <div className="flex flex-col justify-center text-white">
+          <div className="flex flex-col items-center justify-center text-center text-white md:items-start md:text-left">
 
-            <h1 className="text-5xl font-bold leading-tight">
+            <h1 className="text-4xl font-bold leading-tight md:text-5xl">
 
               Lumenre
               <br />
@@ -36,7 +36,7 @@ const Home = () => {
 
             </h1>
 
-            <div className="mt-10">
+            <div className="mt-10 flex justify-center md:justify-start">
 
               <FeatureCard
                 icon="🔒"
@@ -111,7 +111,7 @@ const FeatureCard = ({
   text
 }) => (
 
-  <div className="flex items-center gap-4 rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md">
+  <div className="flex w-full max-w-sm items-center gap-4 rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md">
 
     <div className="text-3xl">
 
