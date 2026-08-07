@@ -1,120 +1,85 @@
+
 /**
  * ==========================================================
- * File: middleware/pdfUpload.js
+ * middleware/pdfUpload.js
  * ----------------------------------------------------------
  * Cloudinary PDF upload middleware.
  *
  * Purpose:
- *
  * - Receives PDF result slips
- * - Uploads directly to Cloudinary
- * - Stores secure PDF URL
- *
+ * - Uploads PDFs directly to Cloudinary
+ * - Stores the secure Cloudinary URL
+ * - Stores the Cloudinary public ID
+ * - Limits PDF files to 10 MB
  * ==========================================================
  */
-
 
 const multer = require("multer");
 
 const {
   CloudinaryStorage
-} = require(
-  "multer-storage-cloudinary"
-);
+} = require("multer-storage-cloudinary");
 
-
-const cloudinary = require(
-  "../config/cloudinary"
-);
-
+const cloudinary = require("../config/cloudinary");
 
 
 // ==========================================================
 // Cloudinary Storage Configuration
 // ==========================================================
 
-
 const storage = new CloudinaryStorage({
 
   cloudinary,
 
+  params: {
 
-  params:{
+    folder: "lumenre/result-slips",
 
+    resource_type: "raw",
 
-    folder:
-    "lumenre/result-slips",
-
-
-    resource_type:
-    "raw",
-
-
-    allowed_formats:[
-
-      "pdf"
-
-    ]
+    allowed_formats: ["pdf"]
 
   }
 
 });
-
-
 
 
 // ==========================================================
 // File Upload Configuration
 // ==========================================================
 
-
 const pdfUpload = multer({
 
   storage,
 
+  limits: {
 
-  limits:{
-
-    fileSize:
-    10 * 1024 * 1024
+    fileSize: 10 * 1024 * 1024
 
   },
 
+  fileFilter: (req, file, callback) => {
 
-  fileFilter:(req,file,callback)=>{
+    if (file.mimetype === "application/pdf") {
 
+      callback(null, true);
 
-    if(
-      file.mimetype === "application/pdf"
-    ){
-
-      callback(
-        null,
-        true
-      );
-
-    }
-
-    else{
+    } else {
 
       callback(
-
-        new Error(
-          "Only PDF files are allowed"
-        ),
-
+        new Error("Only PDF files are allowed"),
         false
-
       );
 
     }
-
 
   }
-
 
 });
 
 
+// ==========================================================
+// Export
+// ==========================================================
 
 module.exports = pdfUpload;

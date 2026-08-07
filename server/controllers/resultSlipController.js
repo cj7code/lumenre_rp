@@ -114,21 +114,14 @@ asyncHandler(async(req,res)=>{
 
   // Remove old PDF if replacing
 
-  if(existingSlip?.pdfUrl){
+  if(existingSlip?.cloudinaryPublicId){
 
-    const publicId =
-    existingSlip.pdfUrl
-      .split("/")
-      .slice(-2)
-      .join("/")
-      .replace(".pdf","");
-
-    await cloudinary.uploader.destroy(
-      publicId,
-      {
-        resource_type:"raw"
-      }
-    );
+  await cloudinary.uploader.destroy(
+    existingSlip.cloudinaryPublicId,
+    {
+      resource_type:"raw"
+    }
+  );
 
   }
 
@@ -165,7 +158,7 @@ asyncHandler(async(req,res)=>{
       req.file.path,
 
       cloudinaryPublicId:
-      req.file.cloudinaryPublicId,
+      req.file.filename,
 
       // Keep previous release status
 
@@ -565,24 +558,16 @@ asyncHandler(async(req,res)=>{
   }
 
   // Delete physical PDF
-  if(resultSlip.pdfUrl){
+  if(resultSlip.cloudinaryPublicId){
 
-    const publicId =
-    resultSlip.pdfUrl
-      .split("/")
-      .slice(-2)
-      .join("/")
-      .replace(".pdf","");
-
-    await cloudinary.uploader.destroy(
-      publicId,
-      {
-        resource_type:"raw"
-      }
-    );
+  await cloudinary.uploader.destroy(
+    resultSlip.cloudinaryPublicId,
+    {
+      resource_type:"raw"
+    }
+  );
 
   }
-
 
   await resultSlip.deleteOne();
 
