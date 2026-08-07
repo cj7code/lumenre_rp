@@ -35,14 +35,6 @@ const AdminResults = () => {
 
 
 
-  const getPdfUrl = (filePath) => {
-
-    return `${import.meta.env.VITE_SERVER_URL}/${filePath.replace(/\\/g,"/")}`;
-
-  };
-
-
-
   const loadResults = async()=>{
 
     try{
@@ -383,11 +375,9 @@ const AdminResults = () => {
 
                         className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
 
-                        onClick={()=>{
+                        onClick={() => {
 
-                          setSelectedPdf(
-                            getPdfUrl(result.filePath)
-                          );
+                          setSelectedPdf(result.pdfUrl);
 
                           setSelectedStudent(
                             result.student?.fullName
