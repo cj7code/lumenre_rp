@@ -2,163 +2,116 @@
  * ==========================================================
  * File: middleware/pdfUpload.js
  * ----------------------------------------------------------
- * Handles PDF uploads for student result slips.
+ * Cloudinary PDF upload middleware.
  *
- * Responsibilities:
- * - Create upload folder if missing
- * - Store PDF files safely
- * - Generate professional filenames
- * - Validate PDF format
- * - Limit upload size
+ * Purpose:
+ *
+ * - Receives PDF result slips
+ * - Uploads directly to Cloudinary
+ * - Stores secure PDF URL
+ *
  * ==========================================================
  */
 
 
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 
-
-// ==========================================================
-// Upload Folder
-// ==========================================================
-
-const uploadDirectory =
-path.join(
-  __dirname,
-  "../uploads/results"
+const {
+  CloudinaryStorage
+} = require(
+  "multer-storage-cloudinary"
 );
 
 
-// Create folder automatically if it does not exist
-
-if (!fs.existsSync(uploadDirectory)) {
-
-  fs.mkdirSync(
-    uploadDirectory,
-    {
-      recursive:true
-    }
-  );
-
-}
+const cloudinary = require(
+  "../config/cloudinary"
+);
 
 
 
 // ==========================================================
-// Storage Configuration
+// Cloudinary Storage Configuration
 // ==========================================================
 
-const storage = multer.diskStorage({
 
-  destination:(req,file,cb)=>{
+const storage = new CloudinaryStorage({
 
-    cb(
-      null,
-      uploadDirectory
-    );
-
-  },
+  cloudinary,
 
 
-  filename: async (req, file, cb) => {
-
-  const Student = require("../models/Student");
-
-  try {
-
-    const student = await Student.findById(
-      req.body.student
-    );
+  params:{
 
 
-    const studentId =
-      student ? student.studentId : "unknown";
+    folder:
+    "lumenre/result-slips",
 
 
-    const {
-      year,
-      semester,
-      academicYear
-    } = req.body;
+    resource_type:
+    "raw",
 
 
-    const extension =
-      path.extname(file.originalname);
+    allowed_formats:[
 
+      "pdf"
 
-    const timestamp = Date.now();
-
-    const fileName =
-    `${studentId}_Y${year}_S${semester}_${academicYear}_${timestamp}${extension}`;
-
-
-    cb(null, fileName);
-
-
-  } catch(error) {
-
-    cb(error);
+    ]
 
   }
-
-}
 
 });
 
 
 
-// ==========================================================
-// File Validation
-// ==========================================================
-
-const fileFilter = (req,file,cb)=>{
-
-
-  if(
-    file.mimetype === "application/pdf"
-  ){
-
-    cb(
-      null,
-      true
-    );
-
-  }
-  else{
-
-    cb(
-      new Error(
-        "Only PDF files are allowed."
-      ),
-      false
-    );
-
-  }
-
-};
-
-
 
 // ==========================================================
-// Multer Configuration
+// File Upload Configuration
 // ==========================================================
+
 
 const pdfUpload = multer({
 
   storage,
 
-  fileFilter,
-
 
   limits:{
 
-    // Maximum file size: 5MB
-
     fileSize:
-    5 * 1024 * 1024
+    10 * 1024 * 1024
+
+  },
+
+
+  fileFilter:(req,file,callback)=>{
+
+
+    if(
+      file.mimetype === "application/pdf"
+    ){
+
+      callback(
+        null,
+        true
+      );
+
+    }
+
+    else{
+
+      callback(
+
+        new Error(
+          "Only PDF files are allowed"
+        ),
+
+        false
+
+      );
+
+    }
+
 
   }
+
 
 });
 

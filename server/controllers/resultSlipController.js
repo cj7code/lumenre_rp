@@ -14,10 +14,6 @@
  * ==========================================================
  */
 
-
-const fs = require("fs");
-
-
 const ResultSlip =
 require("../models/ResultSlip");
 
@@ -34,6 +30,9 @@ require("../utils/createAudit");
 
 const asyncHandler =
 require("../middleware/asyncHandler");
+
+const cloudinary =
+require("../config/cloudinary");
 
 
 // ==========================================================
@@ -115,15 +114,21 @@ asyncHandler(async(req,res)=>{
 
   // Remove old PDF if replacing
 
-  if(
+  if(existingSlip?.pdfUrl){
 
-    existingSlip &&
-    existingSlip.filePath &&
-    fs.existsSync(existingSlip.filePath)
+    const publicId =
+    existingSlip.pdfUrl
+      .split("/")
+      .slice(-2)
+      .join("/")
+      .replace(".pdf","");
 
-  ){
-
-    fs.unlinkSync(existingSlip.filePath);
+    await cloudinary.uploader.destroy(
+      publicId,
+      {
+        resource_type:"raw"
+      }
+    );
 
   }
 
@@ -156,10 +161,11 @@ asyncHandler(async(req,res)=>{
       semester,
 
 
-      filePath:
+      pdfUrl:
+      req.file.path,
 
-      `uploads/results/${req.file.filename}`,
-
+      cloudinaryPublicId:
+      req.file.cloudinaryPublicId,
 
       // Keep previous release status
 
@@ -327,10 +333,8 @@ asyncHandler(async(req,res)=>{
     createdAt:
     slip.createdAt,
 
-
-    downloadUrl:
-
-    `${process.env.SERVER_URL}/${slip.filePath.replace(/\\/g,"/")}`
+    // Cloudinary URL for PDF download
+    downloadUrl: slip.pdfUrl
 
 
   }));
@@ -561,14 +565,21 @@ asyncHandler(async(req,res)=>{
   }
 
   // Delete physical PDF
-  if(
+  if(resultSlip.pdfUrl){
 
-    resultSlip.filePath &&
-    fs.existsSync(resultSlip.filePath)
+    const publicId =
+    resultSlip.pdfUrl
+      .split("/")
+      .slice(-2)
+      .join("/")
+      .replace(".pdf","");
 
-  ){
-
-    fs.unlinkSync(resultSlip.filePath);
+    await cloudinary.uploader.destroy(
+      publicId,
+      {
+        resource_type:"raw"
+      }
+    );
 
   }
 

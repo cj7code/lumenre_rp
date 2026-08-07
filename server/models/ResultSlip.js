@@ -40,9 +40,14 @@ const resultSlipSchema = new mongoose.Schema(
     },
 
     // PDF file location
-    filePath: {
-      type: String,
-      required: true,
+    pdfUrl:{
+        type:String,
+        required:true
+    },
+
+    cloudinaryPublicId:{
+        type:String,
+        required:true
     },
 
     // Has the admin released this result?
